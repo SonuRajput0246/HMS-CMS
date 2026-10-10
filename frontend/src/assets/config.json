@@ -1,0 +1,9 @@
+{
+    "global_setting": {
+        "app_logo_image": "",
+        "api_base_url": "http://localhost:5000",
+        "terms_condition_url": "",
+        "privacy_policy_url": "",
+        "page_load_time": 1000
+    }
+}
