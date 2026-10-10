@@ -12,6 +12,7 @@ import {
 } from '../../models/ICms.model';
 import { CmsRecipeService } from '../../services/cms/recipe.service';
 import { ConfirmationService } from '../../services/confirmation.service';
+import { InstanceService } from '../../core/config/instance.service';
 import { InventoryService } from '../../services/inventory.service';
 import { CustomSnackbarService } from '../../shared/custom-snackbar/custom-snackbar.service';
 
@@ -64,6 +65,7 @@ export class RecipeListComponent implements OnInit {
   private _confirmService = inject(ConfirmationService);
   private _dialog = inject(MatDialog);
   private _route = inject(ActivatedRoute);
+  private _instance = inject(InstanceService);
   private _fb = inject(FormBuilder);
 
   @ViewChild('recipeFormTpl') recipeFormTpl!: TemplateRef<unknown>;
@@ -159,7 +161,7 @@ export class RecipeListComponent implements OnInit {
 
   private initNavigation(): void {
     this.navData = [
-      { displayValue: 'Home', isClickable: true, isDashboard: false, redirectValue: '/hms/dashboard' },
+      { displayValue: 'Home', isClickable: true, isDashboard: false, redirectValue: this._instance.homeUrl },
       { displayValue: 'CMS', isClickable: false, isDashboard: false },
       {
         displayValue: this._route.snapshot.data['breadcrumb'] || 'Menu & Recipes',

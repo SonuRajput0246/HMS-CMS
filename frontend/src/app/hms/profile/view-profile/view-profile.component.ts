@@ -3,6 +3,7 @@ import { INavigationaBar } from '../../../models/ICommon.model';
 import { Router } from '@angular/router';
 import { IUserProfile } from '../../../models/IAuth.model';
 import { UserAccountService } from '../../../services/user-account.service';
+import { STORAGE_KEYS } from '../../../core/config/storage-keys';
 
 @Component({
   selector: 'app-view-profile',
@@ -48,7 +49,7 @@ export class ViewProfileComponent implements OnInit {
     }).unsubscribe();
 
     if (Object.keys(user).length === 0) {
-      const stored = localStorage.getItem('hms_userData');
+      const stored = localStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (stored) {
         try {
           user = JSON.parse(stored);

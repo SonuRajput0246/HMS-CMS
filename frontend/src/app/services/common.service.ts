@@ -4,6 +4,7 @@ import { IAppSetting } from '../models/IAppSettings.model';
 import { catchError, Observable, of } from 'rxjs';
 import { IEntityResponse } from '../models/ICommon.model';
 import { AppConfig } from '../core/config/config';
+import { STORAGE_KEYS } from '../core/config/storage-keys';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class CommonService {
   routeChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   getUserFullName(): string {
-    const userData = localStorage.getItem('hms_userData');
+    const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
     if (!userData) {
       return '';
     }
@@ -35,7 +36,7 @@ export class CommonService {
 
 
   private getInitialMfaStatus(): boolean {
-    const user = JSON.parse(localStorage.getItem('hms_userData') || '{}');
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_DATA) || '{}');
     return !!user?.mfa_enabled;
   }
 
@@ -45,18 +46,18 @@ export class CommonService {
 
   setMFAEnabledStatus(status: boolean) {
     this.mfaEnabledSignal.set(status);
-    const user = JSON.parse(localStorage.getItem('hms_userData') || '{}');
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_DATA) || '{}');
     user.mfa_enabled = status;
-    localStorage.setItem('hms_userData', JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
   }
 
   getLoggedInUserId(): number {
-    const user = JSON.parse(localStorage.getItem('hms_userData') || '{}');
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_DATA) || '{}');
     return user?.id || 0;
   }
 
   getMenuAccess(): any[] {
-    const user = JSON.parse(localStorage.getItem('hms_userData') || '{}');
+    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_DATA) || '{}');
     return user?.menu_access || [];
   }
 

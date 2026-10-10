@@ -12,6 +12,7 @@ import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
 // import { CommonService } from '../services/common.service';
 import { AppConfig } from '../core/config/config';
+import { STORAGE_KEYS } from './config/storage-keys';
 
 
 @Injectable()
@@ -30,7 +31,7 @@ export class HttpIntercept implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-        const accessToken = sessionStorage.getItem('hms_accessToken');
+        const accessToken = sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
         //// Do NOT attach token for login or public APIs
         const isPublicApi = 
@@ -95,8 +96,8 @@ export class HttpIntercept implements HttpInterceptor {
                 switchMap((res) => {
                     this.isRefreshing = false;
                     if (res?.status && res?.data?.access_token) {
-                        sessionStorage.setItem('hms_accessToken', res.data.access_token);
-                        localStorage.setItem('hms_userData', JSON.stringify(res.data));
+                        sessionStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.access_token);
+                        localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(res.data));
                         this.refreshTokenSubject.next(res.data.access_token);
                         return next.handle(this.addToken(request, res.data.access_token));
                     }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { CommonService } from '../services/common.service';
+import { STORAGE_KEYS } from './config/storage-keys';
 
 
 @Injectable({
@@ -11,7 +12,7 @@ export class AuthGuard {
 
     canActivate(route: ActivatedRouteSnapshot): boolean {
 
-        const token = sessionStorage.getItem('hms_accessToken');
+        const token = sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
         if (!token) {
             sessionStorage.clear();
@@ -24,7 +25,7 @@ export class AuthGuard {
             return true;
         }
 
-        const userData = localStorage.getItem('hms_userData');
+        const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
         if (!userData) {
             this.router.navigate(['/auth/login'], { replaceUrl: true });
             return false;

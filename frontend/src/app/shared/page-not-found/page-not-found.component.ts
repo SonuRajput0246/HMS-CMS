@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { InstanceService } from '../../core/config/instance.service';
 
 @Component({
   selector: 'app-page-not-found',
@@ -6,5 +7,8 @@ import { Component } from '@angular/core';
   styleUrl: './page-not-found.component.scss'
 })
 export class PageNotFoundComponent {
+
+  /** Where "Go to home" should lead on the instance that is actually running. */
+  homeUrl = inject(InstanceService).homeUrl;
 
 }

@@ -6,6 +6,7 @@ import { IUserProfile } from '../../../models/IAuth.model';
 import { UserAccountService } from '../../../services/user-account.service';
 import { CustomSnackbarService } from '../../../shared/custom-snackbar/custom-snackbar.service';
 import { finalize } from 'rxjs/operators';
+import { STORAGE_KEYS } from '../../../core/config/storage-keys';
 
 @Component({
   selector: 'app-manage-profile',
@@ -58,7 +59,7 @@ export class ManageProfileComponent implements OnInit {
     }).unsubscribe();
 
     if (Object.keys(user).length === 0) {
-      const stored = localStorage.getItem('hms_userData');
+      const stored = localStorage.getItem(STORAGE_KEYS.USER_DATA);
       if (stored) {
         try {
           user = JSON.parse(stored);
@@ -94,10 +95,10 @@ export class ManageProfileComponent implements OnInit {
         next: (res) => {
           if (res?.status) {
             // refresh the cached user so the topnav + view page update
-            const currentUser = JSON.parse(localStorage.getItem('hms_userData') || '{}');
+            const currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_DATA) || '{}');
             currentUser.first_name = payload.first_name;
             currentUser.last_name = payload.last_name;
-            localStorage.setItem('hms_userData', JSON.stringify(currentUser));
+            localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(currentUser));
 
             this._accountService.setUser({ ...currentUser, ...payload });
             this._snackbar.openSnackBar(res.message || 'Profile updated successfully', 'success');

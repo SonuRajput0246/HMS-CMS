@@ -25,6 +25,15 @@ export class InitialService {
           }
 
           this.appConfig.set('BASE_URL', baseUrl);
+
+          // Which product this deployment is. Left undefined when absent so
+          // InstanceService can apply its own HMS fallback rather than
+          // failing startup on a half-written config file.
+          const instanceType = data?.global_setting?.instance_type;
+          if (instanceType) {
+            this.appConfig.set('INSTANCE_TYPE', instanceType);
+          }
+
           resolve();
         },
         error: reject
