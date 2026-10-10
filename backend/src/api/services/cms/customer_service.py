@@ -2,7 +2,7 @@ from sqlalchemy import func
 from decimal import Decimal
 
 from src.api.models.cms.customer_model import Customer
-from src.api.services.document_sequence_service import DocumentSequenceService
+from src.api.services.common.document_sequence_service import DocumentSequenceService
 from src.api.utils.responses import service_response
 
 

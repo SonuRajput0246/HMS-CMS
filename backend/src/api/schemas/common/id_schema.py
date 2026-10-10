@@ -1,5 +1,5 @@
 from marshmallow import fields, validate
-from src.api.schemas.base import BaseSchema
+from src.api.schemas.common.base import BaseSchema
 
 
 def id_schema_factory(
@@ -40,7 +40,7 @@ def id_schema_factory(
 
 
 # from marshmallow import fields, validate
-# from src.api.schemas.base import BaseSchema
+# from src.api.schemas.common.base import BaseSchema
 #
 #
 # def id_schema_factory(field_name: str, label: str = "Id"):

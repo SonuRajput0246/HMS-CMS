@@ -118,5 +118,5 @@ date
 
 
 
-## to insert fake data (remove this afterwords)
+## if you want to insert fake data
 pip install faker

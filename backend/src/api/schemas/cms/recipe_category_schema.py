@@ -1,6 +1,6 @@
 from marshmallow import fields, validate
 
-from src.api.schemas.base import BaseSchema
+from src.api.schemas.common.base import BaseSchema
 from src.api.schemas.fields.text import text_field
 from src.api.schemas.common.id_schema import id_schema_factory
 

@@ -1,5 +1,5 @@
 from marshmallow import fields, validate
-from src.api.schemas.base import BaseSchema
+from src.api.schemas.common.base import BaseSchema
 
 
 class PaginationSchema(BaseSchema):

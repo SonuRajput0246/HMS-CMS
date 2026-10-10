@@ -18,7 +18,7 @@ from src.api.models.cms.table_model import Table
 from src.api.models.cms.customer_model import Customer
 from src.api.models.cms.recipe_model import Recipe
 from src.api.models.common.inventory_model import Inventory
-from src.api.services.document_sequence_service import DocumentSequenceService
+from src.api.services.common.document_sequence_service import DocumentSequenceService
 from src.api.utils.responses import service_response
 
 

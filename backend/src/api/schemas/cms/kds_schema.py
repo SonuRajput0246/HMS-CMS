@@ -1,6 +1,6 @@
 from marshmallow import fields, validate
 
-from src.api.schemas.base import BaseSchema
+from src.api.schemas.common.base import BaseSchema
 from src.api.schemas.common.id_schema import id_schema_factory
 from src.api.models.cms.order_model import PREP_STATUS_SETTABLE
 

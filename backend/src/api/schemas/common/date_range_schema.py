@@ -1,4 +1,4 @@
-from src.api.schemas.base import BaseSchema
+from src.api.schemas.common.base import BaseSchema
 from src.api.schemas.mixins.date_mixin import DateRangeValidationMixin
 from src.api.schemas.fields.date import OptionalDateTimeField
 

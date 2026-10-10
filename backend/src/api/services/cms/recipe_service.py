@@ -5,7 +5,7 @@ from src.api.models.cms.recipe_model import Recipe
 from src.api.models.cms.recipe_category_model import RecipeCategory
 from src.api.models.cms.recipe_ingredient_model import RecipeIngredient
 from src.api.models.common.inventory_model import Inventory
-from src.api.services.document_sequence_service import DocumentSequenceService
+from src.api.services.common.document_sequence_service import DocumentSequenceService
 from src.api.utils.enum_helper import EnumHelper, EnumUnavailableError
 from src.api.utils.responses import service_response
 

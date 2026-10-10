@@ -10,16 +10,23 @@ from marshmallow.exceptions import MarshmallowError
 from sqlalchemy.sql.operators import json_getitem_op
 from src.api.utils.error_handlers import register_error_handlers
 
-from src.api.routes.room_route import room_bp
-from src.api.routes.user_route import user_bp
-from src.api.routes.auth_route import auth_bp
-from src.api.routes.admin_route import admin_bp
-from src.api.routes.guest_route import guest_bp
-from src.api.routes.common_route import common_bp
-from src.api.routes.inventory_route import inventory_bp
-from src.api.routes.user_account_route import account_bp
-from src.api.routes.reservation_route import reservation_bp
-from src.api.routes.template_route import template_bp
+## Routes, grouped by bucket. Which group an endpoint belongs to is decided by
+## the `if app.config[...]` gates in create_app(), not by the import list.
+##
+## Imports are unconditional on purpose. A CMS process still has to be able to
+## import this module, and the gate below decides what actually gets registered.
+from src.api.routes.common.auth_route import auth_bp
+from src.api.routes.common.user_route import user_bp
+from src.api.routes.common.admin_route import admin_bp
+from src.api.routes.common.common_route import common_bp
+from src.api.routes.common.user_account_route import account_bp
+from src.api.routes.common.template_route import template_bp
+
+## HMS (hotel) routes
+from src.api.routes.hms.room_route import room_bp
+from src.api.routes.hms.guest_route import guest_bp
+from src.api.routes.hms.inventory_route import inventory_bp
+from src.api.routes.hms.reservation_route import reservation_bp
 
 ### CMS (Cafe Management System) routes
 from src.api.routes.cms.table_zone_route import table_zone_bp

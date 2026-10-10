@@ -1,6 +1,6 @@
 from marshmallow import fields, validate, ValidationError, validates_schema
 
-from src.api.schemas.base import BaseSchema
+from src.api.schemas.common.base import BaseSchema
 from src.api.utils.datetime_helper import REPORT_PRESETS
 
 
