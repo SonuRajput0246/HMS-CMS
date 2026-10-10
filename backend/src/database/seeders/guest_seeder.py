@@ -2,7 +2,7 @@ from datetime import date
 from sqlalchemy import select
 from datetime import datetime, timezone
 from src.database.session import db_session
-from src.api.models.guest_model import Guest
+from src.api.models.hms.guest_model import Guest
 
 
 guests_data = [

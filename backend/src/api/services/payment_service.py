@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from src.api.models import Payment, SystemSetting
-from src.api.models.enum_definitions_model import EnumDefinition
+from src.api.models.common.enum_definitions_model import EnumDefinition
 from src.api.services.exchange_service import ExchangeService
 from src.api.utils.currency_utils import calculate_base_amount
 from src.api.utils.responses import service_response

@@ -5,7 +5,7 @@ from flask import current_app, request
 from sqlalchemy import select
 from src.api.extensions import bcrypt
 from src.api.models import EmailOTP, Token, Module, RoleModuleAccess
-from src.api.models.user_model import User
+from src.api.models.common.user_model import User
 from src.api.schemas.auth_schema import LoginResponseSchema
 from src.api.utils.mfa import generate_secret, get_uri, verify_otp
 from src.api.utils.security import hash_value

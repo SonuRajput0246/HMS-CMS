@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from datetime import datetime
 
-from src.api.models.document_sequence_model import DocumentSequence
-from src.api.models.prefixes_model import Prefixes
+from src.api.models.common.document_sequence_model import DocumentSequence
+from src.api.models.common.prefixes_model import Prefixes
 
 
 class DocumentSequenceService:

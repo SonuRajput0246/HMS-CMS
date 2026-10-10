@@ -3,7 +3,7 @@ from decimal import Decimal
 from sqlalchemy import func
 
 from src.api.models.cms.order_model import CMSOrder, OrderStatusEnum
-from src.api.models.customer_model import Customer
+from src.api.models.cms.customer_model import Customer
 from src.api.services.cms.reports_service import ReportsService, ReportRangeError, _d
 from src.api.utils.responses import service_response
 

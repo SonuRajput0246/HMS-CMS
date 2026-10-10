@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from datetime import datetime, timezone
-from src.api.models.reservation_model import Reservation
-from src.api.models.guest_model import Guest
-from src.api.models.reservation_primary_guest_model import ReservationPrimaryGuest
+from src.api.models.hms.reservation_model import Reservation
+from src.api.models.hms.guest_model import Guest
+from src.api.models.hms.reservation_primary_guest_model import ReservationPrimaryGuest
 from src.database.session import db_session
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from datetime import datetime, timezone
 from src.api.models import RoomType
-from src.api.models.room_model import Room
+from src.api.models.hms.room_model import Room
 from src.database.session import db_session
 
 

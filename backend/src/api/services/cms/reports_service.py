@@ -12,9 +12,9 @@ from src.api.models.cms.order_model import (
     PaymentStatusEnum,
     PREP_VOIDED,
 )
-from src.api.models.customer_model import Customer
-from src.api.models.table_model import Table
-from src.api.models.user_model import User
+from src.api.models.cms.customer_model import Customer
+from src.api.models.cms.table_model import Table
+from src.api.models.common.user_model import User
 from src.api.utils.datetime_helper import (
     business_timezone,
     business_timezone_name,
@@ -595,7 +595,7 @@ class ReportsService:
         Bounded to what the cafe can actually sell now: inactive recipes, 86'd
         dishes and deleted ones are not "dead stock", they are retired.
         """
-        from src.api.models.recipe_model import Recipe
+        from src.api.models.cms.recipe_model import Recipe
 
         sold = sold_item_ids or set()
         recipes = (

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from src.database.session import db_session
-from src.api.models.additional_guest_model import AdditionalGuest
+from src.api.models.hms.additional_guest_model import AdditionalGuest
 
 
 def seed_additional_guests():

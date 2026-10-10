@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING, List, Optional
 import enum
 
 if TYPE_CHECKING:
-    from src.api.models.table_model import Table
-    from src.api.models.customer_model import Customer
-    from src.api.models.recipe_model import Recipe
-    from src.api.models.inventory_model import Inventory
-    from src.api.models.user_model import User
+    from src.api.models.cms.table_model import Table
+    from src.api.models.cms.customer_model import Customer
+    from src.api.models.cms.recipe_model import Recipe
+    from src.api.models.common.inventory_model import Inventory
+    from src.api.models.common.user_model import User
 
 
 class OrderStatusEnum(str, enum.Enum):

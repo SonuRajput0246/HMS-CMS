@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from datetime import datetime, timezone
 from src.api.models import Room, Prefixes, ReservationSequence
-from src.api.models.reservation_model import Reservation
+from src.api.models.hms.reservation_model import Reservation
 from src.database.session import db_session
 
 

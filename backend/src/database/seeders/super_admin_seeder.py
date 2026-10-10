@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from src.api.extensions import bcrypt
-from src.api.models.user_model import User
-from src.api.models.role_model import Role
+from src.api.models.common.user_model import User
+from src.api.models.common.role_model import Role
 from src.database.session import db_session
 from datetime import datetime, timezone
 

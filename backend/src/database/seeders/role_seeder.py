@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from src.database.session import db_session
-from src.api.models.role_model import Role
-from src.api.models.module_model import Module
-from src.api.models.role_module_access_model import RoleModuleAccess
+from src.api.models.common.role_model import Role
+from src.api.models.common.module_model import Module
+from src.api.models.common.role_module_access_model import RoleModuleAccess
 from datetime import datetime, timezone
 
 # ============================================

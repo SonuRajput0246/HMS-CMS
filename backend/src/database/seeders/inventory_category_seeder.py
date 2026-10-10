@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from src.database.session import db_session
-from src.api.models.inventory_category_model import InventoryCategory
+from src.api.models.common.inventory_category_model import InventoryCategory
 from datetime import datetime, timezone
 
 categories = [

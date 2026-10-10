@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from src.database.session import db_session
-from src.api.models.login_sliders_model import LoginSliders
+from src.api.models.common.login_sliders_model import LoginSliders
 from datetime import datetime, timezone
 
 sliders = [

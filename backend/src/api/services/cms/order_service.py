@@ -14,10 +14,10 @@ from src.api.models.cms.order_model import (
     PREP_VOIDED,
 )
 from src.api.utils.datetime_helper import utcnow
-from src.api.models.table_model import Table
-from src.api.models.customer_model import Customer
-from src.api.models.recipe_model import Recipe
-from src.api.models.inventory_model import Inventory
+from src.api.models.cms.table_model import Table
+from src.api.models.cms.customer_model import Customer
+from src.api.models.cms.recipe_model import Recipe
+from src.api.models.common.inventory_model import Inventory
 from src.api.services.document_sequence_service import DocumentSequenceService
 from src.api.utils.responses import service_response
 

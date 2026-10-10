@@ -8,9 +8,9 @@ creates circular imports.
 Import the specific model you need directly, e.g.:
 
     from src.api.models.cms.order_model import CMSOrder
-    from src.api.models.table_model import Table
-    from src.api.models.customer_model import Customer
-    from src.api.models.recipe_model import Recipe
+    from src.api.models.cms.table_model import Table
+    from src.api.models.cms.customer_model import Customer
+    from src.api.models.cms.recipe_model import Recipe
 
 Base model discovery happens in src/api/models/__init__.py which must
 import all model modules so SQLAlchemy's declarative registry knows

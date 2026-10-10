@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from src.database.session import db_session
-from src.api.models.inventory_units_model import InventoryUnits
+from src.api.models.common.inventory_units_model import InventoryUnits
 from datetime import datetime, timezone
 
 inventory_units = [

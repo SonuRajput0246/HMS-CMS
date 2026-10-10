@@ -29,7 +29,7 @@ would get a fresh sibling inserted.
 """
 from sqlalchemy import select
 
-from src.api.models.template_model import Template
+from src.api.models.common.template_model import Template
 from src.api.utils.template_codes import (
     OTP_VARIABLES,
     TemplateCode,

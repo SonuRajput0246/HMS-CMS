@@ -65,31 +65,36 @@ def create_app():
     bcrypt.init_app(app)
 
     ## Register blueprints
+    ##
+    ## Only the active instance's blueprints are registered. An unregistered
+    ## blueprint means its routes 404 rather than existing-but-hidden, which is
+    ## what we want: a CMS deployment should not accept a room-booking payload
+    ## just because the endpoint is undocumented. The frontend hides those
+    ## screens; this stops the calls reaching the database at all.
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     app.register_blueprint(user_bp, url_prefix="/api/v1/user")
     app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
-    app.register_blueprint(inventory_bp, url_prefix="/api/v1/inventory")
     app.register_blueprint(common_bp, url_prefix="/api/v1/common")
     app.register_blueprint(account_bp, url_prefix="/api/v1/user-account")
-    app.register_blueprint(reservation_bp, url_prefix="/api/v1/reservation")
-    app.register_blueprint(room_bp, url_prefix="/api/v1/room")
-    app.register_blueprint(guest_bp, url_prefix="/api/v1/guest")
     app.register_blueprint(template_bp, url_prefix="/api/v1/template")
 
-    ## CMS blueprints. Registered unconditionally for now so the routes are
-    ## testable during development. Before the CMS goes live these should be
-    ## wrapped in `if INSTANCE_TYPE == InstanceType.CMS` so an HMS instance
-    ## exposes none of them.
-    app.register_blueprint(table_zone_bp, url_prefix="/api/v1/table-zone")
-    app.register_blueprint(table_bp, url_prefix="/api/v1/table")
-    app.register_blueprint(customer_bp, url_prefix="/api/v1/customer")
-    app.register_blueprint(order_bp, url_prefix="/api/v1/order")
-    app.register_blueprint(recipe_category_bp, url_prefix="/api/v1/recipe-category")
-    app.register_blueprint(recipe_bp, url_prefix="/api/v1/recipe")
-    app.register_blueprint(recipe_ingredient_bp, url_prefix="/api/v1/recipe-ingredient")
-    app.register_blueprint(kds_bp, url_prefix="/api/v1/kds")
-    app.register_blueprint(pos_bp, url_prefix="/api/v1/pos")
-    app.register_blueprint(report_bp, url_prefix="/api/v1/report")
+    if app.config["IS_HMS"]:
+        app.register_blueprint(inventory_bp, url_prefix="/api/v1/inventory")
+        app.register_blueprint(reservation_bp, url_prefix="/api/v1/reservation")
+        app.register_blueprint(room_bp, url_prefix="/api/v1/room")
+        app.register_blueprint(guest_bp, url_prefix="/api/v1/guest")
+
+    if app.config["IS_CMS"]:
+        app.register_blueprint(table_zone_bp, url_prefix="/api/v1/table-zone")
+        app.register_blueprint(table_bp, url_prefix="/api/v1/table")
+        app.register_blueprint(customer_bp, url_prefix="/api/v1/customer")
+        app.register_blueprint(order_bp, url_prefix="/api/v1/order")
+        app.register_blueprint(recipe_category_bp, url_prefix="/api/v1/recipe-category")
+        app.register_blueprint(recipe_bp, url_prefix="/api/v1/recipe")
+        app.register_blueprint(recipe_ingredient_bp, url_prefix="/api/v1/recipe-ingredient")
+        app.register_blueprint(kds_bp, url_prefix="/api/v1/kds")
+        app.register_blueprint(pos_bp, url_prefix="/api/v1/pos")
+        app.register_blueprint(report_bp, url_prefix="/api/v1/report")
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import select
 
-from src.api.models.recipe_category_model import RecipeCategory
+from src.api.models.cms.recipe_category_model import RecipeCategory
 from src.database.session import db_session
 
 

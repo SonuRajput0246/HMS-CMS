@@ -1,5 +1,5 @@
 from marshmallow import fields, validate
-from src.api.models.user_model import User
+from src.api.models.common.user_model import User
 from src.api.schemas.base import BaseSchema
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from src.api.schemas.mixins.otp_mixin import OTPFieldMixin

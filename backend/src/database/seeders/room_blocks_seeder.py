@@ -2,7 +2,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from datetime import datetime, timezone
 from src.api.models import Room
-from src.api.models.room_blocks_model import RoomBlocks
+from src.api.models.hms.room_blocks_model import RoomBlocks
 from src.database.session import db_session
 
 

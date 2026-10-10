@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from src.database.session import db_session
-from src.api.models.module_model import Module
+from src.api.models.common.module_model import Module
 from datetime import datetime, timezone
 
 modules_data = [{

@@ -1,5 +1,5 @@
-from src.api.models.recipe_category_model import RecipeCategory
-from src.api.models.recipe_model import Recipe
+from src.api.models.cms.recipe_category_model import RecipeCategory
+from src.api.models.cms.recipe_model import Recipe
 from src.api.services.cms.reference_data_helper import revive_or_flag_duplicate
 from src.api.utils.responses import service_response
 

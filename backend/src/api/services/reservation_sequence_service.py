@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from datetime import datetime
 
-from src.api.models.reservation_sequence_model import ReservationSequence
-from src.api.models.prefixes_model import Prefixes
+from src.api.models.hms.reservation_sequence_model import ReservationSequence
+from src.api.models.common.prefixes_model import Prefixes
 
 
 class ReservationSequenceService:

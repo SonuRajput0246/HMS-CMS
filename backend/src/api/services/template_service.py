@@ -34,8 +34,8 @@ response returns the `status/data/meta` envelope used by
 import logging
 from datetime import datetime, timezone
 
-from src.api.models.template_model import Template
-from src.api.models.enum_definitions_model import EnumDefinition
+from src.api.models.common.template_model import Template
+from src.api.models.common.enum_definitions_model import EnumDefinition
 from src.api.utils.jwt_helper import get_current_user_id
 from src.api.utils.responses import service_response
 from src.api.utils.template_codes import default_sort_order

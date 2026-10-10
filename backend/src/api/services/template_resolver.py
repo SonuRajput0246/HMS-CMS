@@ -28,8 +28,8 @@ DESIGN RULES
 """
 import logging
 
-from src.api.models.template_model import Template
-from src.api.models.enum_definitions_model import EnumDefinition
+from src.api.models.common.template_model import Template
+from src.api.models.common.enum_definitions_model import EnumDefinition
 from src.api.utils.template_renderer import (
     render_email,
     render_in_app,

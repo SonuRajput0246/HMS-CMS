@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from flask import current_app
 from sqlalchemy import update
 
-from src.api.models.email_otp_model import EmailOTP
+from src.api.models.common.email_otp_model import EmailOTP
 from src.api.services.template_resolver import TemplateResolver
 from src.api.utils.email_helper import send_email
 from src.api.utils.security import hash_value

@@ -2,7 +2,7 @@ import logging
 from sqlalchemy.orm import joinedload
 from src.api.models import Room, RoomType
 from src.api.utils.responses import service_response
-from src.api.models.enum_definitions_model import EnumDefinition
+from src.api.models.common.enum_definitions_model import EnumDefinition
 
 
 logger = logging.getLogger(__name__)

@@ -1,5 +1,5 @@
-from src.api.models.table_model import Table
-from src.api.models.table_zone_model import TableZone
+from src.api.models.cms.table_model import Table
+from src.api.models.cms.table_zone_model import TableZone
 from src.api.models.cms.order_model import CMSOrder, OrderStatusEnum
 from src.api.utils.responses import service_response
 
