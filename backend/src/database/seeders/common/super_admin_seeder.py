@@ -21,8 +21,29 @@ def seed_super_admin():
             return
 
         ## Start seeding Super Admin
-        user_stmt = select(User).filter_by(email="ADMIN_EMAIL", is_deleted=False)
-        existing_admin = db_session.execute(user_stmt).scalar_one_or_none()
+        ## Filter on ADMIN_EMAIL, the variable. This used to filter on the
+        ## literal string "ADMIN_EMAIL", which can never match any row, so the
+        ## existence check always reported "not found" and inserted a new
+        ## super admin on every single run.
+        ##
+        ## `.first()` rather than `scalar_one_or_none()`: this is an existence
+        ## check, so one row is all it needs. scalar_one_or_none() additionally
+        ## asserts uniqueness, which turned databases already carrying the
+        ## duplicates this bug created into a hard failure -- the seeder could
+        ## never recover from its own past. Duplicates are reported instead.
+        user_stmt = select(User).filter_by(email=ADMIN_EMAIL, is_deleted=False)
+        existing_admins = db_session.execute(user_stmt).scalars().all()
+
+        if len(existing_admins) > 1:
+            print(
+                f"!!! WARNING: {len(existing_admins)} active users share the "
+                f"super admin email {ADMIN_EMAIL}. Only the first is kept; the "
+                f"rest are leftovers from a previous seeding bug. Remove them: "
+                f"DELETE FROM users WHERE email = '{ADMIN_EMAIL}' AND id > "
+                f"{existing_admins[0].id};"
+            )
+
+        existing_admin = existing_admins[0] if existing_admins else None
 
         if not existing_admin:
             ## Create Super Admin user
@@ -45,7 +66,12 @@ def seed_super_admin():
             print(f"Super Admin ({ADMIN_EMAIL}) already exists. Skipping...")
     except Exception as e:
         db_session.rollback()
-        print(f"Error while seeding Super Admin: {str(e)}")
+        ## Raise rather than print-and-return, consistent with the other
+        ## seeders. A silently skipped super admin is an app nobody can log
+        ## into, and that should stop the run rather than look like success.
+        print(f"!!! Super Admin seeder FAILED: "
+              f"{str(e).encode('ascii', 'replace').decode('ascii')[:300]}")
+        raise
     finally:
         db_session.remove()
 
