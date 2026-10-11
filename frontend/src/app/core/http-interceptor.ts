@@ -34,10 +34,15 @@ export class HttpIntercept implements HttpInterceptor {
         const accessToken = sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
         //// Do NOT attach token for login or public APIs
-        const isPublicApi = 
+        const isPublicApi =
             req.url.includes('/auth/login') ||
             req.url.includes('/auth/get-fresh-token') ||
-            req.url.includes('/assets/');
+            req.url.includes('/assets/') ||
+            //// Public by design, and called during APP_INITIALIZER before any
+            //// session exists. Attaching a stale token here would make the
+            //// instance check fail on a session that was meant to be
+            //// unauthenticated.
+            req.url.includes('/api/v1/common/instance-config');
         
         let authReq = req;
 

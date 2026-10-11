@@ -1,8 +1,8 @@
 """initial_migrations
 
-Revision ID: fc20a92f5427
+Revision ID: dc171fda68b9
 Revises: 
-Create Date: 2026-10-10 22:18:18.994536
+Create Date: 2026-10-11 15:41:50.126361
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'fc20a92f5427'
+revision: str = 'dc171fda68b9'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

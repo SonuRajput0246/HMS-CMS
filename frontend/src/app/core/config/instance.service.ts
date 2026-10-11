@@ -7,10 +7,15 @@ export type InstanceType = 'HMS' | 'CMS';
 /**
  * Single source of truth for "which product am I?".
  *
- * The value comes from `assets/config.json` (`instance_type`), which
- * `InitialService` loads in an APP_INITIALIZER before the router ever
- * activates. That ordering matters: every `getter` below is only correct once
- * that initializer has resolved, so nothing may read them at module scope.
+ * The value is resolved by `InitialService` before the router ever activates,
+ * from the BACKEND where possible (`GET /api/v1/common/instance-config`),
+ * falling back to `instance_type` in `assets/config.json` when the backend
+ * cannot be reached. The backend wins because it is what decides which
+ * endpoints exist; the frontend asking its own static file what it is
+ * supports was how the two could silently disagree.
+ *
+ * Ordering matters: every `getter` below is only correct once that initializer
+ * has resolved, so nothing may read them at module scope.
  *
  * Every navigation out of shared code (auth flows, 404 page, redirects) should
  * go through `homeUrl` rather than spelling `/hms/...` out. Feature folders own
