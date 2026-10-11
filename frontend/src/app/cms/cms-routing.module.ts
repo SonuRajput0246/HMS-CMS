@@ -15,9 +15,17 @@ import { ReportScreenComponent } from './reports/report-screen.component';
  * CMS routes.
  *
  * `menuId` values are the module ids from the CMS module seeder
- * (src/database/seeders/module_seeder_cms.py). AuthGuard reads them off
+ * (src/database/seeders/cms/module_seeder.py). AuthGuard reads them off
  * route.data and checks the signed-in user's menu_access, so a role without
  * TABLE access cannot reach /cms/tables even by typing the URL.
+ *
+ * Two of these were wrong and are fixed here:
+ *
+ *  - `reports` used menuId 1 (DASHBOARD) because no REPORTS module existed.
+ *    That handed sales and customer data to anyone with dashboard access. It
+ *    is now its own module (id 16), granted to MANAGER/ADMIN/SUPER_ADMIN only.
+ *  - `recipes` used menuId 12 (RECIPE_ITEM), the child list rather than
+ *    RECIPE (11), the parent menu. Same access outcome here, wrong level.
  *
  * POS and KDS are routed outside the dashboard shell on purpose: both are
  * full-bleed screens that a cashier and a chef use continuously, and the
@@ -68,13 +76,13 @@ const routes: Routes = [
     path: 'recipes',
     component: RecipeListComponent,
     canActivate: [AuthGuard],
-    data: { menuId: 12, breadcrumb: 'Menu & Recipes' }
+    data: { menuId: 11, breadcrumb: 'Menu & Recipes' }
   },
   {
     path: 'reports',
     component: ReportScreenComponent,
     canActivate: [AuthGuard],
-    data: { menuId: 1, breadcrumb: 'Reports' }
+    data: { menuId: 16, breadcrumb: 'Reports' }
   }
 ];
 

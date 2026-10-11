@@ -2,6 +2,7 @@ import { inject, NgModule } from '@angular/core';
 import { CanMatchFn, RouterModule, Routes } from '@angular/router';
 import { PageNotFoundComponent } from './shared/page-not-found/page-not-found.component';
 import { InstanceHomeRedirectComponent } from './core/instance-home-redirect.component';
+import { UnauthorizedAccessComponent } from './shared/unauthorized-access/unauthorized-access.component';
 import { InstanceService } from './core/config/instance.service';
 
 /**
@@ -61,6 +62,13 @@ export const routes: Routes = [
     path: 'cms',
     canMatch: [activeInstance('CMS')],
     loadChildren: () => import('./cms/cms.module').then(a => a.CmsModule)
+  },
+  {
+    // AuthGuard sends denied users here. Declared before `**` because a `**`
+    // route matches anything; without this the 403 fell through to the 404
+    // page and "no permission" was indistinguishable from "no such page".
+    path: 'unauthorized-access',
+    component: UnauthorizedAccessComponent
   },
   {
     path: '**',

@@ -73,11 +73,16 @@ ROLE_DEFINITIONS = [
 # Maps role_code -> list of module_name patterns + operations
 ROLE_PERMISSIONS = {
     "SUPER_ADMIN": {
-        "*": ["Create", "Edit", "Delete", "View"]  # All modules, all ops
+        # Export included: it is the operation that pulls bulk business data
+        # out, and a super admin with no way to export is a support ticket.
+        "*": ["Create", "Edit", "Delete", "View", "Export"]  # All modules, all ops
     },
     "ADMIN": {
         "*": ["Create", "Edit", "Delete", "View"],
-        # Can restrict specific modules if needed
+        ## Plus REPORTS/Export -- see REPORTS_ROLES. A wildcard cannot express
+        ## "everything except Export on reports", and Export is the operation
+        ## that pulls bulk business data out of the system.
+        "REPORTS": ["Export"],
     },
     "MANAGER": {
         "DASHBOARD": ["View"],
@@ -87,7 +92,6 @@ ROLE_PERMISSIONS = {
         "INVENTORY_MANAGEMENT": ["View"],
         "INVENTORY_CATEGORY": ["Create", "Edit", "View"],
         "INVENTORY_ITEM": ["Create", "Edit", "View"],
-        "REPORTS": ["View"],  # If you add reports module
     },
     "FRONT_DESK": {
         "DASHBOARD": ["View"],
@@ -135,6 +139,15 @@ ROLE_PERMISSIONS = {
         "KDS": ["View"],
     },
 }
+
+
+## Roles that may open Reports. Kept out of ROLE_PERMISSIONS above on purpose:
+## that matrix is a flat role -> module map, and Reports is a module no staff
+## role should reach. Listing it here makes the grant auditable in one place.
+##
+## MANAGER already gets it from its explicit entry; ADMIN from its wildcard.
+## SUPER_ADMIN from its wildcard. No staff role is listed, which is the point.
+REPORTS_ROLES = ("MANAGER",)
 
 
 def seed_roles():
@@ -192,6 +205,14 @@ def _assign_role_permissions(role: Role, module_map: dict):
 
     # Get permission config for this role
     perm_config = ROLE_PERMISSIONS.get(role.role_code, {})
+
+    ## Reports is granted from REPORTS_ROLES rather than ROLE_PERMISSIONS, so
+    ## the set of roles that can open it is auditable in one place. The lookup
+    ## returns a fresh dict because ROLE_PERMISSIONS entries are module-level
+    ## objects and mutating one would leak across roles on a re-seed.
+    perm_config = dict(perm_config)
+    if role.role_code in REPORTS_ROLES:
+        perm_config["REPORTS"] = ["View", "Export"]
 
     # Clear existing permissions (for idempotent seeding)
     db_session.query(RoleModuleAccess).filter_by(role_id=role.id).delete()

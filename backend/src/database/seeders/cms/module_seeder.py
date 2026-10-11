@@ -215,16 +215,69 @@ modules_data = [{
 			{"key": "Edit Template", "value": False, "operation_key": "Edit"},
 			{"key": "Delete Template", "value": False, "operation_key": "Delete"}
         ]
+    }, {
+        ## Reports reads sales figures, kitchen performance and customer data,
+        ## so it needs its own module row. It previously had none: the frontend
+        ## pointed /cms/reports at menuId 1 (DASHBOARD) purely so the route was
+        ## reachable, which handed report data to anyone with dashboard access.
+        "id": 16,
+        "module_name": "REPORTS",
+        "module_display_name": "Reports",
+        "menu_parent_code": 0,
+        "has_child_menu": False,
+        "route_path": "reports",
+        "display_order_no": 12,
+        "icon": "menu_book.png",
+        "access_json": [
+			{"key": "View", "value": False, "operation_key": "View"},
+			{"key": "Export", "value": False, "operation_key": "Export"}
+        ]
     },
 ]
 
+
+def _resolve_id(module_data):
+    """The id to insert under, or None to let AUTO_INCREMENT decide.
+
+    The declared `id` is a stable contract: the frontend's `menuId` values and
+    role_seeder's permission matrix both reference these numbers. They used to
+    be decorative -- never passed to the constructor -- so the real ids came
+    from AUTO_INCREMENT and only happened to match on a virgin database.
+
+    If the declared id is already held by a *different* module, that database
+    has drifted (rows inserted out of band, a partial restore). Falling back to
+    AUTO_INCREMENT keeps the seed working; the warning names the module so the
+    drift is visible rather than silently producing wrong permissions.
+    """
+    declared = module_data.get("id")
+    if declared is None:
+        return None
+
+    occupant = db_session.execute(
+        select(Module).filter(Module.id == declared)
+    ).scalar_one_or_none()
+
+    if occupant is not None and occupant.module_name != module_data["module_name"]:
+        print(
+            f"!!! WARNING: id {declared} is already taken by "
+            f"{occupant.module_name!r}, cannot use it for "
+            f"{module_data['module_name']!r}. Falling back to AUTO_INCREMENT. "
+            f"Front-end menuId values will not match this database."
+        )
+        return None
+
+    return declared
+
+
 def seed_modules_cms():
     try:
+        created = 0
         for module_data in modules_data:
             stmt = select(Module).filter_by(module_name=module_data["module_name"], is_deleted=False)
             exists = db_session.execute(stmt).scalar_one_or_none()
             if not exists:
                 new_module = Module(
+                    id=_resolve_id(module_data),
                     module_name=module_data["module_name"],
                     module_display_name=module_data["module_display_name"],
                     menu_parent_code=module_data["menu_parent_code"],
@@ -238,12 +291,15 @@ def seed_modules_cms():
                     updated_at=datetime.now(timezone.utc)
                 )
                 db_session.add(new_module)
+                created += 1
 
         db_session.commit()
-        print("--- Modules created successfully. ---")
+        print(f"--- Modules seeded successfully. ({created} created) ---")
     except Exception as e:
         db_session.rollback()
-        print(f"!!! Error seeding modules: {str(e)}")
+        print(f"!!! Module seeder FAILED: "
+              f"{str(e).encode('ascii', 'replace').decode('ascii')[:300]}")
+        raise
     finally:
         db_session.remove()
 

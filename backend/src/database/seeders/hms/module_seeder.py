@@ -125,7 +125,7 @@ modules_data = [
     },
     {
         "id": 9,
-        "module_name": "INVENTORY_CATEGORIES",
+        "module_name": "INVENTORY_CATEGORY",
         "module_display_name": "Inventory Categories",
         "menu_parent_code": 8,
         "has_child_menu": False,
@@ -189,13 +189,49 @@ modules_data = [
     },
 ]
 
+
+def _resolve_id(module_data):
+    """The id to insert under, or None to let AUTO_INCREMENT decide.
+
+    The declared `id` is a stable contract: the frontend's `menuId` values in
+    child-routes.ts and role_seeder's permission matrix both reference these
+    numbers. They used to be decorative -- never passed to the constructor --
+    so the real ids came from AUTO_INCREMENT and only matched on a virgin
+    database.
+
+    If the declared id is held by a *different* module, the database has
+    drifted. Fall back to AUTO_INCREMENT so seeding still completes, and warn
+    loudly rather than silently producing mismatched permissions.
+    """
+    declared = module_data.get("id")
+    if declared is None:
+        return None
+
+    occupant = db_session.execute(
+        select(Module).filter(Module.id == declared)
+    ).scalar_one_or_none()
+
+    if occupant is not None and occupant.module_name != module_data["module_name"]:
+        print(
+            f"!!! WARNING: id {declared} is already taken by "
+            f"{occupant.module_name!r}, cannot use it for "
+            f"{module_data['module_name']!r}. Falling back to AUTO_INCREMENT. "
+            f"Front-end menuId values will not match this database."
+        )
+        return None
+
+    return declared
+
+
 def seed_modules_hms():
     try:
+        created = 0
         for module_data in modules_data:
             stmt = select(Module).filter_by(module_name=module_data["module_name"], is_deleted=False)
             exists = db_session.execute(stmt).scalar_one_or_none()
             if not exists:
                 new_module = Module(
+                    id=_resolve_id(module_data),
                     module_name=module_data["module_name"],
                     module_display_name=module_data["module_display_name"],
                     menu_parent_code=module_data["menu_parent_code"],
@@ -209,14 +245,20 @@ def seed_modules_hms():
                     updated_at=datetime.now(timezone.utc)
                 )
                 db_session.add(new_module)
+                created += 1
 
         db_session.commit()
-        print("--- Modules created successfully. ---")
+        print(f"--- Modules seeded successfully. ({created} created) ---")
     except Exception as e:
         db_session.rollback()
-        print(f"!!! Error seeding modules: {str(e)}")
+        print(f"!!! Module seeder FAILED: "
+              f"{str(e).encode('ascii', 'replace').decode('ascii')[:300]}")
+        raise
     finally:
         db_session.remove()
 
+
 if __name__ == "__main__":
-    seed_modules()
+    ## This used to call seed_modules(), which does not exist -- a NameError
+    ## on direct execution only, since run_base_seeders imports the real name.
+    seed_modules_hms()
