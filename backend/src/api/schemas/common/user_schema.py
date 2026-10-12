@@ -2,6 +2,7 @@ from marshmallow import fields, validate, validates_schema, ValidationError
 from src.api.schemas.common.base import BaseSchema
 from src.api.schemas.common.id_schema import id_schema_factory
 from src.api.schemas.mixins.name_mixin import NameFieldsMixin
+from src.api.schemas.fields.password import update_password_field
 
 GetUserByIdSchema = id_schema_factory("id", "User Id")
 
@@ -14,15 +15,13 @@ class UpsertUserSchema(UpsertUserIdSchema, NameFieldsMixin, UpsertUserRoleIdSche
         allow_none=True,
         error_messages={"invalid": "Invalid email address"}
     )
-    password = fields.String(
-        required=False,
-        allow_none=True,
-        validate=validate.Length(
-            min=1,
-            max=20,
-            error="Password must be between 1 and 20 characters long"
-        )
-    )
+    # Reuses the shared field rather than repeating the rule. This one declared
+    # its own `validate.Length(min=1, max=20)` while every other password entry
+    # point -- registration, reset, change-your-own -- goes through
+    # update_password_field and so enforces PASSWORD_MIN_LENGTH (6). An admin
+    # could therefore create a user with a one-character password that the same
+    # user could not have set for themselves.
+    password = update_password_field("Password", required=False)
     is_active = fields.Boolean(required=True)
     is_deleted = fields.Boolean(required=True)
     @validates_schema

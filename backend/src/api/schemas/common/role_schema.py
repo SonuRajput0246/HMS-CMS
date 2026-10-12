@@ -15,7 +15,17 @@ class UpsertRoleSchema(UpsertRoleIdSchema):
 
 ## Define the schema for the items INSIDE the list first
 class RoleModuleAccessItemSchema(BaseSchema):
-    id = fields.Int(required=True)
+    ## `id` is optional, and AdminService.update_role_access ignores it: the
+    ## service keys the incoming set on (module_id, operation_key) and hard-
+    ## deletes whatever is absent.
+    ##
+    ## It was required=True, so a caller had to supply a value the service
+    ## never reads. On an edit round trip the Angular screen sends back the row
+    ## id get-role-by-id gave it; on a *new* grant there is no row yet, so it
+    ## sends a local counter++. Any other client -- a script, a test, another
+    ## frontend -- that sent exactly the fields the service reads was rejected
+    ## with {'id': ['Missing data for required field.']}.
+    id = fields.Int(required=False, allow_none=True)
     is_active = fields.Bool(required=True)
     module_id = fields.Int(required=True)
     operation_name = fields.Str(required=True)
