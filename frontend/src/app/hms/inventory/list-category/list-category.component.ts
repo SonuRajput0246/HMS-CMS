@@ -8,6 +8,7 @@ import { IInventoryCategory } from '../../../models/IAdmin.model';
 import { InventoryService } from '../../../services/inventory.service';
 import { CustomSnackbarService } from '../../../shared/custom-snackbar/custom-snackbar.service';
 import { ConfirmationService } from '../../../services/confirmation.service';
+import { InstanceService } from '../../../core/config/instance.service';
 
 @Component({
   selector: 'app-list-category',
@@ -20,6 +21,10 @@ export class ListCategoryComponent implements OnInit {
   private _router = inject(Router);
   private _snackbar = inject(CustomSnackbarService);
   private _confirmService = inject(ConfirmationService);
+private _instance = inject(InstanceService);
+
+  /** Base URL for this screen within the active product, for template use. */
+  readonly invBase = `${this._instance.prefix}/inventory`;
 
   //// Constants
   private readonly STORAGE_KEY = 'hms_invCategoryList';
@@ -109,7 +114,9 @@ export class ListCategoryComponent implements OnInit {
   }
 
   onEdit(item: IInventoryCategory): void {
-    this._router.navigate(['hms/inventory/update-category', item.id]);
+    /// Instance-aware prefix: this component is mounted by both products, and a
+    /// literal 'hms' made every edit click 404 in the cafe deployment.
+    this._router.navigate([`${this._instance.prefix}/inventory/update-category`, item.id]);
   }
 
   onDelete(item: IInventoryCategory): void {

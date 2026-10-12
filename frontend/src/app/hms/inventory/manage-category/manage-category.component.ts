@@ -4,6 +4,7 @@ import { InventoryService } from '../../../services/inventory.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomSnackbarService } from '../../../shared/custom-snackbar/custom-snackbar.service';
 import { finalize } from 'rxjs/operators';
+import { InstanceService } from '../../../core/config/instance.service';
 
 @Component({
   selector: 'app-manage-category',
@@ -17,6 +18,10 @@ export class ManageCategoryComponent {
   private _router = inject(Router);
   private _snackbar = inject(CustomSnackbarService);
   private AR = inject(ActivatedRoute);
+private _instance = inject(InstanceService);
+
+  /** Base URL for this screen within the active product, for template use. */
+  readonly invBase = `${this._instance.prefix}/inventory`;
 
   categoryForm!: FormGroup;
   breakpoint = 3;
@@ -70,7 +75,9 @@ export class ManageCategoryComponent {
         next: (res) => {
           if (res?.status) {
             this._snackbar.openSnackBar(res?.message || 'Category saved successfully', "success");
-            this._router.navigate(['hms/inventory/list-category']);
+            /// Back to the list within the active product. A literal 'hms' here
+            /// meant a save in the cafe deployment navigated to a gated route.
+            this._router.navigate([`${this._instance.prefix}/inventory/list-category`]);
           } else {
             this._snackbar.openSnackBar(res?.message || 'Failed to save category', "error");
           }

@@ -3,6 +3,7 @@ import { InventoryService } from '../../../services/inventory.service';
 import { Router } from '@angular/router';
 import { CustomSnackbarService } from '../../../shared/custom-snackbar/custom-snackbar.service';
 import { ConfirmationService } from '../../../services/confirmation.service';
+import { InstanceService } from '../../../core/config/instance.service';
 import { IInventory } from '../../../models/IAdmin.model';
 import { IGenricGrid, ISearchRequest } from '../../../models/ICommon.model';
 import { finalize } from 'rxjs/operators';
@@ -19,6 +20,17 @@ export class ListInventoryComponent {
   private _router = inject(Router);
   private _snackbar = inject(CustomSnackbarService);
   private _confirmService = inject(ConfirmationService);
+private _instance = inject(InstanceService);
+
+  /**
+   * Base URL for this screen within the active product, for template use.
+   *
+   * These components are mounted by both products -- cms/inventory/
+   * cms-inventory-routing.module.ts reuses them on the CMS module ids -- so a
+   * literal /hms in a template is a dead link in the cafe deployment, exactly
+   * as it was in the TypeScript.
+   */
+  readonly invBase = `${this._instance.prefix}/inventory`;
 
   //// Constants
   private readonly STORAGE_KEY = 'hms_inventoryList';
@@ -108,7 +120,11 @@ export class ListInventoryComponent {
   }
 
   onEdit(item: IInventory): void {
-    this._router.navigate(['hms/inventory/update-inventory', item.id]);
+    /// Prefix from InstanceService, not a literal 'hms'. This component is
+    /// mounted by both products -- cms/inventory/cms-inventory-routing.module.ts
+    /// reuses it on the CMS module ids -- and /hms is canMatch-gated to HMS, so
+    /// a hardcoded hms/ here made every edit click 404 in the cafe deployment.
+    this._router.navigate([`${this._instance.prefix}/inventory/update-inventory`, item.id]);
   }
 
   onDelete(item: IInventory): void {
