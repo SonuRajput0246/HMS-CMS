@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '../../../shared/shared.module';
 import { AppConfig } from '../../../core/config/config';
@@ -91,10 +91,38 @@ describe('ListTemplateComponent', () => {
 
   it('should label channels for the grid', () => {
     const fixture = TestBed.createComponent(ListTemplateComponent);
+    const http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+
+    /// channelLabel resolves through the enum options the component loads on
+    /// init. With that request unanswered `channels` is empty and every key
+    /// falls through to itself, so 'email' would come back as 'email' and the
+    /// test would prove nothing.
+    for (const request of http.match(() => true)) {
+      request.flush({
+        status: true,
+        data: [
+          { option_key: 'email', option_label: 'Email' },
+          { option_key: 'in_app', option_label: 'In-App' },
+        ],
+      });
+    }
+    fixture.detectChanges();
+
     const component = fixture.componentInstance;
 
     expect(component.channelLabel('email')).toBe('Email');
     expect(component.channelLabel('in_app')).toBe('In-App');
-    expect(component.channelLabel(undefined)).toBe('—');
+
+    /// An absent channel renders as a plain hyphen. The assertion here used
+    /// to carry a corrupted replacement character instead of '-', which is
+    /// why it had never passed.
+    expect(component.channelLabel(undefined)).toBe('\u2014');
+
+    /// An unknown key falls back to itself rather than to a dash: a dead
+    /// dropdown must not hide the templates an operator needs to fix.
+    expect(component.channelLabel('sms')).toBe('sms');
+
+    http.verify();
   });
 });

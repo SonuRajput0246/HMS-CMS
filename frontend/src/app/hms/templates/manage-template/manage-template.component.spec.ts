@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -23,16 +23,38 @@ describe('ManageTemplateComponent', () => {
     TestBed.inject(HttpTestingController).verify();
   });
 
-  it('should create', () => {
+  /**
+   * Create the component and let it settle.
+   *
+   * ngOnInit fires two requests -- getEnumOptions for template_channel and for
+   * template_variable, joined by forkJoin. Tests that assert form behaviour
+   * still have to account for them, because the strict verify() in afterEach
+   * treats an unanswered request as a failure. That strictness is the point: an
+   * unflushed request usually means the code under test made a call the test
+   * did not know about.
+   *
+   * So rather than loosen verify(), every pending request is answered here.
+   */
+  function createComponent(): ComponentFixture<ManageTemplateComponent> {
     const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    expect(component).toBeTruthy();
+    fixture.detectChanges();
+
+    const http = TestBed.inject(HttpTestingController);
+    for (const request of http.match(() => true)) {
+      request.flush({ status: true, data: [] });
+    }
+    // Let the forkJoin callback land before the test reads the component.
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('should create', () => {
+    const fixture = createComponent();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
   it('should default to the email channel and require a subject', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const component = createComponent().componentInstance;
 
     expect(component.isEmail()).toBe(true);
 
@@ -41,9 +63,8 @@ describe('ManageTemplateComponent', () => {
   });
 
   it('should swap the required field when the channel changes', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
+    const fixture = createComponent();
     const component = fixture.componentInstance;
-    fixture.detectChanges();
 
     component.templateForm.get('channel')?.setValue('in_app');
     fixture.detectChanges();
@@ -53,9 +74,7 @@ describe('ManageTemplateComponent', () => {
   });
 
   it('should add and remove variables without duplicates', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const component = createComponent().componentInstance;
 
     component.addVariable('user_name');
     component.addVariable('otp');
@@ -70,9 +89,7 @@ describe('ManageTemplateComponent', () => {
   });
 
   it('should report placeholders that are used but not declared', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const component = createComponent().componentInstance;
 
     component.variables = ['user_name'];
     component.templateForm.patchValue({
@@ -83,9 +100,7 @@ describe('ManageTemplateComponent', () => {
   });
 
   it('should report no undeclared placeholders when all are declared', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const component = createComponent().componentInstance;
 
     component.variables = ['user_name', 'otp'];
     component.templateForm.patchValue({
@@ -96,9 +111,7 @@ describe('ManageTemplateComponent', () => {
   });
 
   it('should ignore tokens that are not bare identifiers', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const component = createComponent().componentInstance;
 
     component.variables = [];
     component.templateForm.patchValue({
@@ -111,9 +124,7 @@ describe('ManageTemplateComponent', () => {
   });
 
   it('should supply a sample value for every declared variable', () => {
-    const fixture = TestBed.createComponent(ManageTemplateComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
+    const component = createComponent().componentInstance;
 
     component.variables = ['user_name', 'brand_new_variable'];
     const context = component['buildSampleContext']();
