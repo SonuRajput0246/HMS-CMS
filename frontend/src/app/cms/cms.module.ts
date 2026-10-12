@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { CmsRoutingModule } from './cms-routing.module';
 
+import { CmsLayoutComponent } from './layout/cms-layout.component';
+import { CmsSidenavComponent } from './layout/cms-sidenav.component';
 import { CmsDashboardComponent } from './dashboard/cms-dashboard.component';
 import { PosScreenComponent } from './pos/pos-screen.component';
 import { KdsScreenComponent } from './kds/kds-screen.component';
@@ -28,6 +30,8 @@ import { ReportScreenComponent } from './reports/report-screen.component';
  */
 @NgModule({
   declarations: [
+    CmsLayoutComponent,
+    CmsSidenavComponent,
     CmsDashboardComponent,
     PosScreenComponent,
     KdsScreenComponent,
