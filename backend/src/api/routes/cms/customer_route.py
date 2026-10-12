@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.customer_schema import (
     GetCustomerByIdSchema,
     GetCustomersSchema,
@@ -61,9 +61,9 @@ customer_service_instance = CustomerService(db=db_session)
 customer_route = CustomerRoute(customer_service=customer_service_instance)
 
 
-customer_bp.add_url_rule('/get', view_func=jwt_required(customer_route.get_customers), methods=['POST'])
-customer_bp.add_url_rule('/get-by-id', view_func=jwt_required(customer_route.get_customer_by_id), methods=['GET'])
-customer_bp.add_url_rule('/lookup-by-phone', view_func=jwt_required(customer_route.lookup_by_phone), methods=['POST'])
-customer_bp.add_url_rule('/quick-create', view_func=jwt_required(customer_route.quick_create_customer), methods=['POST'])
-customer_bp.add_url_rule('/upsert', view_func=jwt_required(customer_route.upsert_customer), methods=['POST'])
-customer_bp.add_url_rule('/redeem-points', view_func=jwt_required(customer_route.redeem_points), methods=['POST'])
+customer_bp.add_url_rule('/get', view_func=requires_module("CUSTOMER")(customer_route.get_customers), methods=['POST'])
+customer_bp.add_url_rule('/get-by-id', view_func=requires_module("CUSTOMER")(customer_route.get_customer_by_id), methods=['GET'])
+customer_bp.add_url_rule('/lookup-by-phone', view_func=requires_module("CUSTOMER")(customer_route.lookup_by_phone), methods=['POST'])
+customer_bp.add_url_rule('/quick-create', view_func=requires_module("CUSTOMER")(customer_route.quick_create_customer), methods=['POST'])
+customer_bp.add_url_rule('/upsert', view_func=requires_module("CUSTOMER")(customer_route.upsert_customer), methods=['POST'])
+customer_bp.add_url_rule('/redeem-points', view_func=requires_module("CUSTOMER")(customer_route.redeem_points), methods=['POST'])

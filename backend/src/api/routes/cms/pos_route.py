@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.pos_schema import GetBillSchema, GetPosSummarySchema
 from src.api.services.cms.pos_service import PosService
 from src.database.session import db_session
@@ -30,5 +30,5 @@ pos_service_instance = PosService(db=db_session)
 pos_route = PosRoute(pos_service=pos_service_instance)
 
 
-pos_bp.add_url_rule('/get-bill', view_func=jwt_required(pos_route.get_bill), methods=['POST'])
-pos_bp.add_url_rule('/get-summary', view_func=jwt_required(pos_route.get_summary), methods=['POST'])
+pos_bp.add_url_rule('/get-bill', view_func=requires_module("POS")(pos_route.get_bill), methods=['POST'])
+pos_bp.add_url_rule('/get-summary', view_func=requires_module("POS")(pos_route.get_summary), methods=['POST'])

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from src.database.session import db_session
 from flask import request, jsonify, Blueprint, g
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.services.hms.reservation_service import ReservationService
 from src.api.schemas.hms.reservation_schema import GetAvailableRoomSchema, CreateReservationSchema, GetAllReservationsSchema
 
@@ -67,14 +67,14 @@ class ReservationRoute:
 
 reservation_service_instance = ReservationService(db=db_session)
 reservation_route = ReservationRoute(reservation_service=reservation_service_instance)
-reservation_bp.add_url_rule('/get', view_func=jwt_required(reservation_route.get_all_reservations), methods=['POST'])
-reservation_bp.add_url_rule('/get-available-rooms', view_func=jwt_required(reservation_route.get_available_rooms), methods=['POST'])
-reservation_bp.add_url_rule('/create-reservation-upsert-guest', view_func=jwt_required(reservation_route.create_reservation_upsert_guest), methods=['POST'])
-reservation_bp.add_url_rule('/update', view_func=jwt_required(reservation_route.update_reservation), methods=['PUT'])
-reservation_bp.add_url_rule('/update-guests', view_func=jwt_required(reservation_route.update_guests), methods=['POST'])
-reservation_bp.add_url_rule('/delete/<int:reservation_id>', view_func=jwt_required(reservation_route.delete_reservation), methods=['DELETE'])
+reservation_bp.add_url_rule('/get', view_func=requires_module("RESERVATIONS")(reservation_route.get_all_reservations), methods=['POST'])
+reservation_bp.add_url_rule('/get-available-rooms', view_func=requires_module("RESERVATIONS")(reservation_route.get_available_rooms), methods=['POST'])
+reservation_bp.add_url_rule('/create-reservation-upsert-guest', view_func=requires_module("RESERVATIONS")(reservation_route.create_reservation_upsert_guest), methods=['POST'])
+reservation_bp.add_url_rule('/update', view_func=requires_module("RESERVATIONS")(reservation_route.update_reservation), methods=['PUT'])
+reservation_bp.add_url_rule('/update-guests', view_func=requires_module("RESERVATIONS")(reservation_route.update_guests), methods=['POST'])
+reservation_bp.add_url_rule('/delete/<int:reservation_id>', view_func=requires_module("RESERVATIONS")(reservation_route.delete_reservation), methods=['DELETE'])
 ## POST rather than PATCH: cancellation is a state transition with its own
 ## body (the reason), not a field update.
-reservation_bp.add_url_rule('/cancel/<int:reservation_id>', view_func=jwt_required(reservation_route.cancel_reservation), methods=['POST'])
-reservation_bp.add_url_rule('/get-by-id/<int:reservation_id>', view_func=jwt_required(reservation_route.get_reservation_by_id), methods=['GET'])
-reservation_bp.add_url_rule('/payment-details', view_func=jwt_required(reservation_route.insert_reservation_payment), methods=['POST'])
+reservation_bp.add_url_rule('/cancel/<int:reservation_id>', view_func=requires_module("RESERVATIONS")(reservation_route.cancel_reservation), methods=['POST'])
+reservation_bp.add_url_rule('/get-by-id/<int:reservation_id>', view_func=requires_module("RESERVATIONS")(reservation_route.get_reservation_by_id), methods=['GET'])
+reservation_bp.add_url_rule('/payment-details', view_func=requires_module("RESERVATIONS")(reservation_route.insert_reservation_payment), methods=['POST'])

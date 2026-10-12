@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.table_zone_schema import (
     GetTableZoneByIdSchema,
     UpsertTableZoneSchema,
@@ -46,7 +46,7 @@ table_zone_service_instance = TableZoneService(db=db_session)
 table_zone_route = TableZoneRoute(table_zone_service=table_zone_service_instance)
 
 
-table_zone_bp.add_url_rule('/get', view_func=jwt_required(table_zone_route.get_table_zones), methods=['POST'])
-table_zone_bp.add_url_rule('/get-by-id', view_func=jwt_required(table_zone_route.get_table_zone_by_id), methods=['GET'])
-table_zone_bp.add_url_rule('/upsert', view_func=jwt_required(table_zone_route.upsert_table_zone), methods=['POST'])
-table_zone_bp.add_url_rule('/get-table-count', view_func=jwt_required(table_zone_route.get_zone_table_count), methods=['GET'])
+table_zone_bp.add_url_rule('/get', view_func=requires_module("TABLE")(table_zone_route.get_table_zones), methods=['POST'])
+table_zone_bp.add_url_rule('/get-by-id', view_func=requires_module("TABLE")(table_zone_route.get_table_zone_by_id), methods=['GET'])
+table_zone_bp.add_url_rule('/upsert', view_func=requires_module("TABLE")(table_zone_route.upsert_table_zone), methods=['POST'])
+table_zone_bp.add_url_rule('/get-table-count', view_func=requires_module("TABLE")(table_zone_route.get_zone_table_count), methods=['GET'])

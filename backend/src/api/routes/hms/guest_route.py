@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.hms.guest_schema import GetAllGuestsSchema, GetGuestByIdSchema
 from src.api.services.hms.guest_service import GuestService
 from src.database.session import db_session
@@ -31,6 +31,6 @@ class GuestRoute:
 
 guest_service_instance = GuestService(db=db_session)
 guest_route = GuestRoute(guest_service=guest_service_instance)
-guest_bp.add_url_rule('/get-all', view_func=jwt_required(guest_route.get_all_guests), methods=['POST'])
-guest_bp.add_url_rule('/get-by-id', view_func=jwt_required(guest_route.get_guest_by_id), methods=['GET'])
-guest_bp.add_url_rule('/upsert', view_func=jwt_required(guest_route.upsert_guest), methods=['POST'])
+guest_bp.add_url_rule('/get-all', view_func=requires_module("GUEST")(guest_route.get_all_guests), methods=['POST'])
+guest_bp.add_url_rule('/get-by-id', view_func=requires_module("GUEST")(guest_route.get_guest_by_id), methods=['GET'])
+guest_bp.add_url_rule('/upsert', view_func=requires_module("GUEST")(guest_route.upsert_guest), methods=['POST'])

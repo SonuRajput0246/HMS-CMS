@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.common.common_schema import GetAllStatesSchema, GetAllCountriesSchema, GetAllCitiesSchema, \
     GetAllCurrenciesSchema, GetEnumOptionsSchema
 from src.api.services.common.common_service import CommonService
@@ -58,8 +58,8 @@ common_route = CommonRoute(common_service=common_service_instance)
 ## exists, so jwt_required would deadlock the boot sequence.
 common_bp.add_url_rule('/instance-config', view_func=common_route.get_instance_config, methods=['GET'])
 common_bp.add_url_rule('/get-login-slider-data', view_func=common_route.get_login_slider_data, methods=['GET'])
-common_bp.add_url_rule('/get-all-countries', view_func=jwt_required(common_route.get_all_countries), methods=['POST'])
-common_bp.add_url_rule('/get-all-states', view_func=jwt_required(common_route.get_all_states), methods=['POST'])
-common_bp.add_url_rule('/get-all-cities', view_func=jwt_required(common_route.get_all_cities), methods=['POST'])
-common_bp.add_url_rule('/get-all-currencies', view_func=jwt_required(common_route.get_all_currencies), methods=['POST'])
-common_bp.add_url_rule('/get-enum-options', view_func=jwt_required(common_route.get_enum_options), methods=['POST'])
+common_bp.add_url_rule('/get-all-countries', view_func=requires_module(SELF_SERVICE)(common_route.get_all_countries), methods=['POST'])
+common_bp.add_url_rule('/get-all-states', view_func=requires_module(SELF_SERVICE)(common_route.get_all_states), methods=['POST'])
+common_bp.add_url_rule('/get-all-cities', view_func=requires_module(SELF_SERVICE)(common_route.get_all_cities), methods=['POST'])
+common_bp.add_url_rule('/get-all-currencies', view_func=requires_module(SELF_SERVICE)(common_route.get_all_currencies), methods=['POST'])
+common_bp.add_url_rule('/get-enum-options', view_func=requires_module(SELF_SERVICE)(common_route.get_enum_options), methods=['POST'])

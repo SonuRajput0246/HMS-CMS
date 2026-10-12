@@ -2,7 +2,7 @@ import logging
 
 from flask import Blueprint, request, jsonify, make_response, current_app
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.common.auth_schema import RegisterUserSchema, VerifyEmailSchema, LoginSchema, SendOtpOnEmailSchema, \
     ActivateAccountSchema, ResetPasswordSchema
 from src.api.services.common.auth_service import AuthService
@@ -232,10 +232,10 @@ auth_bp.add_url_rule('/send-otp', view_func=auth_route.send_otp_on_email, method
 auth_bp.add_url_rule('/activate-account', view_func=auth_route.activate_account, methods=['POST'])
 auth_bp.add_url_rule('/get-fresh-token', view_func=auth_route.get_fresh_tokens, methods=['POST'])
 auth_bp.add_url_rule('/reset-password', view_func=auth_route.reset_password, methods=['POST'])
-auth_bp.add_url_rule('/logout', view_func=jwt_required(auth_route.logout), methods=['POST'])
+auth_bp.add_url_rule('/logout', view_func=requires_module(SELF_SERVICE)(auth_route.logout), methods=['POST'])
 
-auth_bp.add_url_rule('/setup-mfa/<int:user_id>', view_func=jwt_required(auth_route.initiate_setup_mfa), methods=['GET'])
-auth_bp.add_url_rule('/setup-mfa/verify-totp', view_func=jwt_required(auth_route.verify_and_enable_mfa), methods=['POST'])
-auth_bp.add_url_rule('/disable-mfa/<int:user_id>', view_func=jwt_required(auth_route.disable_mfa), methods=['GET'])
+auth_bp.add_url_rule('/setup-mfa/<int:user_id>', view_func=requires_module(SELF_SERVICE)(auth_route.initiate_setup_mfa), methods=['GET'])
+auth_bp.add_url_rule('/setup-mfa/verify-totp', view_func=requires_module(SELF_SERVICE)(auth_route.verify_and_enable_mfa), methods=['POST'])
+auth_bp.add_url_rule('/disable-mfa/<int:user_id>', view_func=requires_module(SELF_SERVICE)(auth_route.disable_mfa), methods=['GET'])
 
 

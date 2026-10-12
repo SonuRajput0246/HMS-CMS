@@ -1,6 +1,6 @@
 import logging
 from flask import Blueprint, request, jsonify, make_response, current_app
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.common.user_account_schema import UpdateUserProfileSchema, DeleteMyAccountSchema, \
     DeactivateMyAccountSchema, UpdatePasswordSchema
 from src.api.services.common.user_account_service import UserAccountService
@@ -86,7 +86,7 @@ user_account_service_instance = UserAccountService(db=db_session)
 account_route = UserAccountRoute(user_account_service=user_account_service_instance)
 
 ## Register routes to blueprint using class methods
-account_bp.add_url_rule('/deactivate', view_func=jwt_required(account_route.deactivate_user), methods=['POST'])
-account_bp.add_url_rule('/update-profile', view_func=jwt_required(account_route.update_user_profile), methods=['PUT'])
-account_bp.add_url_rule('/update-password', view_func=jwt_required(account_route.update_password), methods=['POST'])
-account_bp.add_url_rule('/delete', view_func=jwt_required(account_route.delete_my_account), methods=['POST'])
+account_bp.add_url_rule('/deactivate', view_func=requires_module(SELF_SERVICE)(account_route.deactivate_user), methods=['POST'])
+account_bp.add_url_rule('/update-profile', view_func=requires_module(SELF_SERVICE)(account_route.update_user_profile), methods=['PUT'])
+account_bp.add_url_rule('/update-password', view_func=requires_module(SELF_SERVICE)(account_route.update_password), methods=['POST'])
+account_bp.add_url_rule('/delete', view_func=requires_module(SELF_SERVICE)(account_route.delete_my_account), methods=['POST'])

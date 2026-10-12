@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.recipe_schema import (
     GetMenuSchema,
     GetRecipeByIdSchema,
@@ -58,9 +58,9 @@ recipe_service_instance = RecipeService(db=db_session)
 recipe_route = RecipeRoute(recipe_service=recipe_service_instance)
 
 
-recipe_bp.add_url_rule('/get', view_func=jwt_required(recipe_route.get_recipes), methods=['POST'])
-recipe_bp.add_url_rule('/get-by-id', view_func=jwt_required(recipe_route.get_recipe_by_id), methods=['GET'])
-recipe_bp.add_url_rule('/get-menu', view_func=jwt_required(recipe_route.get_menu), methods=['POST'])
-recipe_bp.add_url_rule('/get-stations', view_func=jwt_required(recipe_route.get_recipe_stations), methods=['GET'])
-recipe_bp.add_url_rule('/upsert', view_func=jwt_required(recipe_route.upsert_recipe), methods=['POST'])
-recipe_bp.add_url_rule('/update-availability', view_func=jwt_required(recipe_route.update_availability), methods=['POST'])
+recipe_bp.add_url_rule('/get', view_func=requires_module("RECIPE")(recipe_route.get_recipes), methods=['POST'])
+recipe_bp.add_url_rule('/get-by-id', view_func=requires_module("RECIPE")(recipe_route.get_recipe_by_id), methods=['GET'])
+recipe_bp.add_url_rule('/get-menu', view_func=requires_module("RECIPE")(recipe_route.get_menu), methods=['POST'])
+recipe_bp.add_url_rule('/get-stations', view_func=requires_module("RECIPE")(recipe_route.get_recipe_stations), methods=['GET'])
+recipe_bp.add_url_rule('/upsert', view_func=requires_module("RECIPE")(recipe_route.upsert_recipe), methods=['POST'])
+recipe_bp.add_url_rule('/update-availability', view_func=requires_module("RECIPE")(recipe_route.update_availability), methods=['POST'])

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.report_schema import (
     CustomerReportSchema,
     DailyTrendReportSchema,
@@ -85,9 +85,9 @@ report_route = ReportRoute(
 )
 
 
-report_bp.add_url_rule('/sales-summary', view_func=jwt_required(report_route.get_sales_summary), methods=['POST'])
-report_bp.add_url_rule('/item-sales', view_func=jwt_required(report_route.get_item_sales), methods=['POST'])
-report_bp.add_url_rule('/daily-trend', view_func=jwt_required(report_route.get_daily_trend), methods=['POST'])
-report_bp.add_url_rule('/void-report', view_func=jwt_required(report_route.get_void_report), methods=['POST'])
-report_bp.add_url_rule('/kitchen-performance', view_func=jwt_required(report_route.get_kitchen_performance), methods=['POST'])
-report_bp.add_url_rule('/customer-report', view_func=jwt_required(report_route.get_customer_report), methods=['POST'])
+report_bp.add_url_rule('/sales-summary', view_func=requires_module("REPORTS")(report_route.get_sales_summary), methods=['POST'])
+report_bp.add_url_rule('/item-sales', view_func=requires_module("REPORTS")(report_route.get_item_sales), methods=['POST'])
+report_bp.add_url_rule('/daily-trend', view_func=requires_module("REPORTS")(report_route.get_daily_trend), methods=['POST'])
+report_bp.add_url_rule('/void-report', view_func=requires_module("REPORTS")(report_route.get_void_report), methods=['POST'])
+report_bp.add_url_rule('/kitchen-performance', view_func=requires_module("REPORTS")(report_route.get_kitchen_performance), methods=['POST'])
+report_bp.add_url_rule('/customer-report', view_func=requires_module("REPORTS")(report_route.get_customer_report), methods=['POST'])

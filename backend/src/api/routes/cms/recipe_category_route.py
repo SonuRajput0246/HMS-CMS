@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.recipe_category_schema import (
     GetRecipeCategoriesSchema,
     GetRecipeCategoryByIdSchema,
@@ -52,7 +52,7 @@ recipe_category_route = RecipeCategoryRoute(
 )
 
 
-recipe_category_bp.add_url_rule('/get', view_func=jwt_required(recipe_category_route.get_recipe_categories), methods=['POST'])
-recipe_category_bp.add_url_rule('/get-by-id', view_func=jwt_required(recipe_category_route.get_recipe_category_by_id), methods=['GET'])
-recipe_category_bp.add_url_rule('/upsert', view_func=jwt_required(recipe_category_route.upsert_recipe_category), methods=['POST'])
-recipe_category_bp.add_url_rule('/get-recipe-count', view_func=jwt_required(recipe_category_route.get_category_recipe_count), methods=['GET'])
+recipe_category_bp.add_url_rule('/get', view_func=requires_module("RECIPE")(recipe_category_route.get_recipe_categories), methods=['POST'])
+recipe_category_bp.add_url_rule('/get-by-id', view_func=requires_module("RECIPE")(recipe_category_route.get_recipe_category_by_id), methods=['GET'])
+recipe_category_bp.add_url_rule('/upsert', view_func=requires_module("RECIPE")(recipe_category_route.upsert_recipe_category), methods=['POST'])
+recipe_category_bp.add_url_rule('/get-recipe-count', view_func=requires_module("RECIPE")(recipe_category_route.get_category_recipe_count), methods=['GET'])

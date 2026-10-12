@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask import g
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.order_schema import (
     AddOrderItemSchema,
     CancelOrderSchema,
@@ -107,16 +107,16 @@ order_service_instance = OrderService(db=db_session)
 order_route = OrderRoute(order_service=order_service_instance)
 
 
-order_bp.add_url_rule('/create', view_func=jwt_required(order_route.create_order), methods=['POST'])
-order_bp.add_url_rule('/get', view_func=jwt_required(order_route.get_orders), methods=['POST'])
-order_bp.add_url_rule('/get-by-id/<int:order_id>', view_func=jwt_required(order_route.get_order), methods=['GET'])
-order_bp.add_url_rule('/get-active-by-table/<int:table_id>', view_func=jwt_required(order_route.get_table_active_order), methods=['GET'])
+order_bp.add_url_rule('/create', view_func=requires_module("ORDER")(order_route.create_order), methods=['POST'])
+order_bp.add_url_rule('/get', view_func=requires_module("ORDER")(order_route.get_orders), methods=['POST'])
+order_bp.add_url_rule('/get-by-id/<int:order_id>', view_func=requires_module("ORDER")(order_route.get_order), methods=['GET'])
+order_bp.add_url_rule('/get-active-by-table/<int:table_id>', view_func=requires_module("ORDER")(order_route.get_table_active_order), methods=['GET'])
 
-order_bp.add_url_rule('/<int:order_id>/items', view_func=jwt_required(order_route.add_item), methods=['POST'])
-order_bp.add_url_rule('/<int:order_id>/items/update-quantity', view_func=jwt_required(order_route.update_item_quantity), methods=['POST'])
-order_bp.add_url_rule('/<int:order_id>/items/void', view_func=jwt_required(order_route.void_item), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/items', view_func=requires_module("ORDER")(order_route.add_item), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/items/update-quantity', view_func=requires_module("ORDER")(order_route.update_item_quantity), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/items/void', view_func=requires_module("ORDER")(order_route.void_item), methods=['POST'])
 
-order_bp.add_url_rule('/<int:order_id>/status', view_func=jwt_required(order_route.update_status), methods=['POST'])
-order_bp.add_url_rule('/<int:order_id>/cancel', view_func=jwt_required(order_route.cancel_order), methods=['POST'])
-order_bp.add_url_rule('/<int:order_id>/payment', view_func=jwt_required(order_route.process_payment), methods=['POST'])
-order_bp.add_url_rule('/<int:order_id>/close', view_func=jwt_required(order_route.close_order), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/status', view_func=requires_module("ORDER")(order_route.update_status), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/cancel', view_func=requires_module("ORDER")(order_route.cancel_order), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/payment', view_func=requires_module("ORDER")(order_route.process_payment), methods=['POST'])
+order_bp.add_url_rule('/<int:order_id>/close', view_func=requires_module("ORDER")(order_route.close_order), methods=['POST'])

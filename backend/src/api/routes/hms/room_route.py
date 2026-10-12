@@ -1,7 +1,7 @@
 from src.database.session import db_session
 from flask import request, jsonify, Blueprint
 from src.api.services.hms.room_service import RoomService
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.hms.room_schema import GetAllRoomsSchema, GetRoomByIdSchema, UpsertRoomSchema
 
 room_bp = Blueprint('room', __name__)
@@ -35,8 +35,8 @@ class RoomRoute:
 
 room_service_instance = RoomService(db=db_session)
 room_route = RoomRoute(room_service=room_service_instance)
-room_bp.add_url_rule('/get-types', view_func=jwt_required(room_route.get_room_types), methods=['GET'])
-room_bp.add_url_rule('/get-all', view_func=jwt_required(room_route.get_all_rooms), methods=['POST'])
-room_bp.add_url_rule('/get-by-id', view_func=jwt_required(room_route.get_room_by_id), methods=['GET'])
-room_bp.add_url_rule('/upsert', view_func=jwt_required(room_route.upsert_room), methods=['POST'])
+room_bp.add_url_rule('/get-types', view_func=requires_module("ROOM")(room_route.get_room_types), methods=['GET'])
+room_bp.add_url_rule('/get-all', view_func=requires_module("ROOM")(room_route.get_all_rooms), methods=['POST'])
+room_bp.add_url_rule('/get-by-id', view_func=requires_module("ROOM")(room_route.get_room_by_id), methods=['GET'])
+room_bp.add_url_rule('/upsert', view_func=requires_module("ROOM")(room_route.upsert_room), methods=['POST'])
 

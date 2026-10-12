@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.recipe_ingredient_schema import (
     ReplaceRecipeIngredientsSchema,
     UpsertRecipeIngredientSchema,
@@ -56,8 +56,8 @@ recipe_ingredient_route = RecipeIngredientRoute(
 )
 
 
-recipe_ingredient_bp.add_url_rule('/<int:recipe_id>', view_func=jwt_required(recipe_ingredient_route.get_recipe_ingredients), methods=['GET'])
-recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/upsert', view_func=jwt_required(recipe_ingredient_route.upsert_ingredient), methods=['POST'])
-recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/replace', view_func=jwt_required(recipe_ingredient_route.replace_ingredients), methods=['POST'])
-recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/delete/<int:ingredient_id>', view_func=jwt_required(recipe_ingredient_route.delete_ingredient), methods=['POST'])
-recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/check-stock', view_func=jwt_required(recipe_ingredient_route.check_ingredient_stock), methods=['GET'])
+recipe_ingredient_bp.add_url_rule('/<int:recipe_id>', view_func=requires_module("RECIPE")(recipe_ingredient_route.get_recipe_ingredients), methods=['GET'])
+recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/upsert', view_func=requires_module("RECIPE")(recipe_ingredient_route.upsert_ingredient), methods=['POST'])
+recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/replace', view_func=requires_module("RECIPE")(recipe_ingredient_route.replace_ingredients), methods=['POST'])
+recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/delete/<int:ingredient_id>', view_func=requires_module("RECIPE")(recipe_ingredient_route.delete_ingredient), methods=['POST'])
+recipe_ingredient_bp.add_url_rule('/<int:recipe_id>/check-stock', view_func=requires_module("RECIPE")(recipe_ingredient_route.check_ingredient_stock), methods=['GET'])

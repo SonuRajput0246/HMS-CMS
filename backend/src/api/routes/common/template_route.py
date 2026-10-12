@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.common.template_schema import (
     GetTemplateByIdSchema,
     GetTemplateCodesSchema,
@@ -71,26 +71,26 @@ template_route = TemplateRoute(template_service=template_service_instance)
 
 template_bp.add_url_rule(
     '/get-templates',
-    view_func=jwt_required(template_route.get_templates),
+    view_func=requires_module("TEMPLATE")(template_route.get_templates),
     methods=['POST']
 )
 template_bp.add_url_rule(
     '/get-template-by-id',
-    view_func=jwt_required(template_route.get_template_by_id),
+    view_func=requires_module("TEMPLATE")(template_route.get_template_by_id),
     methods=['GET']
 )
 template_bp.add_url_rule(
     '/get-template-codes',
-    view_func=jwt_required(template_route.get_template_codes),
+    view_func=requires_module("TEMPLATE")(template_route.get_template_codes),
     methods=['GET']
 )
 template_bp.add_url_rule(
     '/upsert-template',
-    view_func=jwt_required(template_route.upsert_template),
+    view_func=requires_module("TEMPLATE")(template_route.upsert_template),
     methods=['POST']
 )
 template_bp.add_url_rule(
     '/preview-template',
-    view_func=jwt_required(template_route.preview_template),
+    view_func=requires_module("TEMPLATE")(template_route.preview_template),
     methods=['POST']
 )

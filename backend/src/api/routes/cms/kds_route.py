@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.kds_schema import (
     BumpOrderSchema,
     GetKdsTicketsSchema,
@@ -48,8 +48,8 @@ kds_service_instance = KdsService(db=db_session)
 kds_route = KdsRoute(kds_service=kds_service_instance)
 
 
-kds_bp.add_url_rule('/get-tickets', view_func=jwt_required(kds_route.get_tickets), methods=['POST'])
-kds_bp.add_url_rule('/get-ticket/<int:order_id>', view_func=jwt_required(kds_route.get_ticket), methods=['GET'])
-kds_bp.add_url_rule('/get-station-summary', view_func=jwt_required(kds_route.get_station_summary), methods=['GET'])
-kds_bp.add_url_rule('/<int:order_id>/prep-status', view_func=jwt_required(kds_route.update_prep_status), methods=['POST'])
-kds_bp.add_url_rule('/bump', view_func=jwt_required(kds_route.bump_order), methods=['POST'])
+kds_bp.add_url_rule('/get-tickets', view_func=requires_module("KDS")(kds_route.get_tickets), methods=['POST'])
+kds_bp.add_url_rule('/get-ticket/<int:order_id>', view_func=requires_module("KDS")(kds_route.get_ticket), methods=['GET'])
+kds_bp.add_url_rule('/get-station-summary', view_func=requires_module("KDS")(kds_route.get_station_summary), methods=['GET'])
+kds_bp.add_url_rule('/<int:order_id>/prep-status', view_func=requires_module("KDS")(kds_route.update_prep_status), methods=['POST'])
+kds_bp.add_url_rule('/bump', view_func=requires_module("KDS")(kds_route.bump_order), methods=['POST'])

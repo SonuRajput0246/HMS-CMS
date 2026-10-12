@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint
-from src.api.middlewares.auth_middleware import  jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.common.pagination_schema import PaginationSchema
 from src.api.schemas.common.inventory_schema import GetCategoryByIdSchema, GetInventoryById, UpsertInventoryCategorySchema, \
     UpsertInventorySchema
@@ -62,10 +62,10 @@ class InventoryRoute:
 inventory_service_instance = InventoryService(db=db_session)
 inventory_route = InventoryRoute(inventory_service=inventory_service_instance)
 
-inventory_bp.add_url_rule('/get-categories', view_func=jwt_required(inventory_route.get_inventory_categories), methods=['POST'])
-inventory_bp.add_url_rule('/get-category-by-id', view_func=jwt_required(inventory_route.get_inventory_category_by_id), methods=['GET'])
-inventory_bp.add_url_rule('/upsert-category', view_func=jwt_required(inventory_route.upsert_inventory_category), methods=['POST'])
-inventory_bp.add_url_rule('/get', view_func=jwt_required(inventory_route.get_inventories), methods=['POST'])
-inventory_bp.add_url_rule('/get-units', view_func=jwt_required(inventory_route.get_inventory_units), methods=['GET'])
-inventory_bp.add_url_rule('/get-by-id', view_func=jwt_required(inventory_route.get_inventory_by_id), methods=['GET'])
-inventory_bp.add_url_rule('/upsert', view_func=jwt_required(inventory_route.upsert_inventory), methods=['POST'])
+inventory_bp.add_url_rule('/get-categories', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.get_inventory_categories), methods=['POST'])
+inventory_bp.add_url_rule('/get-category-by-id', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.get_inventory_category_by_id), methods=['GET'])
+inventory_bp.add_url_rule('/upsert-category', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.upsert_inventory_category), methods=['POST'])
+inventory_bp.add_url_rule('/get', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.get_inventories), methods=['POST'])
+inventory_bp.add_url_rule('/get-units', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.get_inventory_units), methods=['GET'])
+inventory_bp.add_url_rule('/get-by-id', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.get_inventory_by_id), methods=['GET'])
+inventory_bp.add_url_rule('/upsert', view_func=requires_module("INVENTORY_MANAGEMENT")(inventory_route.upsert_inventory), methods=['POST'])

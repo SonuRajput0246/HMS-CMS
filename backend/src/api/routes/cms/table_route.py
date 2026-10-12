@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.cms.table_schema import (
     GetTableByIdSchema,
     GetTablesSchema,
@@ -51,8 +51,8 @@ table_service_instance = TableService(db=db_session)
 table_route = TableRoute(table_service=table_service_instance)
 
 
-table_bp.add_url_rule('/get', view_func=jwt_required(table_route.get_tables), methods=['POST'])
-table_bp.add_url_rule('/get-by-id', view_func=jwt_required(table_route.get_table_by_id), methods=['GET'])
-table_bp.add_url_rule('/get-floor-view', view_func=jwt_required(table_route.get_table_floor_view), methods=['GET'])
-table_bp.add_url_rule('/upsert', view_func=jwt_required(table_route.upsert_table), methods=['POST'])
-table_bp.add_url_rule('/update-status', view_func=jwt_required(table_route.update_table_status), methods=['POST'])
+table_bp.add_url_rule('/get', view_func=requires_module("TABLE")(table_route.get_tables), methods=['POST'])
+table_bp.add_url_rule('/get-by-id', view_func=requires_module("TABLE")(table_route.get_table_by_id), methods=['GET'])
+table_bp.add_url_rule('/get-floor-view', view_func=requires_module("TABLE")(table_route.get_table_floor_view), methods=['GET'])
+table_bp.add_url_rule('/upsert', view_func=requires_module("TABLE")(table_route.upsert_table), methods=['POST'])
+table_bp.add_url_rule('/update-status', view_func=requires_module("TABLE")(table_route.update_table_status), methods=['POST'])

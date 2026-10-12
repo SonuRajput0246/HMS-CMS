@@ -1,7 +1,7 @@
 from src.database.session import db_session
 from flask import request, jsonify, Blueprint
 from src.api.services.common.user_service import UserService
-from src.api.middlewares.auth_middleware import jwt_required
+from src.api.middlewares.authorization import SELF_SERVICE, requires_module
 from src.api.schemas.common.pagination_schema import PaginationSchema
 from src.api.schemas.common.user_schema import GetUserByIdSchema, UpsertUserSchema
 
@@ -35,6 +35,6 @@ class UserRoute:
 
 user_service_instance = UserService(db=db_session)
 user_route = UserRoute(user_service=user_service_instance)
-user_bp.add_url_rule('/get', view_func=jwt_required(user_route.get_users), methods=['POST'])
-user_bp.add_url_rule('/get-by-id', view_func=jwt_required(user_route.get_user_by_id), methods=['GET'])
-user_bp.add_url_rule('/upsert', view_func=jwt_required(user_route.upsert_user), methods=['POST'])
+user_bp.add_url_rule('/get', view_func=requires_module("USER_MANAGEMENT")(user_route.get_users), methods=['POST'])
+user_bp.add_url_rule('/get-by-id', view_func=requires_module("USER_MANAGEMENT")(user_route.get_user_by_id), methods=['GET'])
+user_bp.add_url_rule('/upsert', view_func=requires_module("USER_MANAGEMENT")(user_route.upsert_user), methods=['POST'])
