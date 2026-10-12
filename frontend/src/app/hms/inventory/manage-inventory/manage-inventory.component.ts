@@ -53,6 +53,13 @@ export class ManageInventoryComponent {
       category_id: ['', Validators.required],
       quantity: [null, Validators.required],
       unit: ['', Validators.required],
+      // Purchase cost per unit, and the price when the item is rung up without
+      // going through a recipe. Both optional: stock nobody has priced yet
+      // legitimately has no cost, and the backend treats null as "unknown"
+      // rather than "free". Both are what the CMS recipe grid costs a dish
+      // from, so a cafe cannot set a menu margin without them.
+      unit_cost: [null],
+      selling_price: [null],
       is_active: [true]
     });
   }
@@ -154,8 +161,18 @@ export class ManageInventoryComponent {
       this.inventoryForm.markAllAsTouched();
       return;
     }
+    // An empty input posts null, not "". The backend schema is Decimal(allow_none)
+    // and a blank string is neither a number nor None, so sending "" turns a
+    // cleared price into a validation error instead of an unpriced item.
+    const formValue = this.inventoryForm.value;
     const payload = {
-      ...this.inventoryForm.value,
+      ...formValue,
+      unit_cost: formValue.unit_cost === '' || formValue.unit_cost === undefined
+        ? null
+        : formValue.unit_cost,
+      selling_price: formValue.selling_price === '' || formValue.selling_price === undefined
+        ? null
+        : formValue.selling_price,
       id: this.inventoryObj?.id || 0,
       is_deleted: false
     };
@@ -188,16 +205,18 @@ export class ManageInventoryComponent {
             if (res?.status) {
               this.isEditMode = true;
               this.inventoryObj = res.data;
-              console.log("001");
               this.inventoryForm.patchValue({
                 id: this.inventoryObj.id,
                 name: this.inventoryObj.name,
                 category_id: this.inventoryObj.category_id,
                 quantity: this.inventoryObj.quantity,
                 unit: this.inventoryObj.unit,
+                // Null for stock that has never been priced, which is a
+                // legitimate state rather than a zero to overwrite.
+                unit_cost: this.inventoryObj.unit_cost ?? null,
+                selling_price: this.inventoryObj.selling_price ?? null,
                 is_active: this.inventoryObj.is_active
               });
-              console.log("002");
             } else {
               this._snackbar.openSnackBar(res?.message || 'Failed to load inventory', 'error');
             }

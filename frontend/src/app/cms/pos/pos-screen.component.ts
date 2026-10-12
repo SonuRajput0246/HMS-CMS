@@ -22,6 +22,7 @@ import {
   toAmount
 } from '../../models/ICms.model';
 import { CmsFloorService } from '../../services/cms/floor.service';
+import { CmsCustomerService } from '../../services/cms/customer.service';
 import { CmsOrderService } from '../../services/cms/order.service';
 import { CmsRecipeService } from '../../services/cms/recipe.service';
 import { ConfirmationService } from '../../services/confirmation.service';
@@ -53,7 +54,12 @@ export class PosScreenComponent implements OnInit {
 
   //// Inject Services
   private _orderService = inject(CmsOrderService);
-  private _floorService = inject(CmsFloorService);
+  // The till genuinely needs both: the floor for tables, the customer service
+// to identify who is paying. Previously one service covered both, which meant
+// every other customer screen also depended on a service named after the
+// floor.
+private _floorService = inject(CmsFloorService);
+private _customerService = inject(CmsCustomerService);
   private _recipeService = inject(CmsRecipeService);
   private _snackbar = inject(CustomSnackbarService);
   private _confirm = inject(ConfirmationService);
@@ -365,7 +371,7 @@ export class PosScreenComponent implements OnInit {
     }
 
     this.isPageLoad = true;
-    this._floorService.lookupByPhone(phone)
+    this._customerService.lookupByPhone(phone)
       .pipe(finalize(() => this.isPageLoad = false))
       .subscribe({
         next: (res) => {
@@ -406,7 +412,7 @@ export class PosScreenComponent implements OnInit {
      * instead of failing, so "found" and "created" are the same outcome here
      * and there is only one branch to get wrong.
      */
-    this._floorService.quickCreateCustomer({ name, phone })
+    this._customerService.quickCreateCustomer({ name, phone })
       .pipe(
         switchMap((res) => {
           if (!res?.status) {

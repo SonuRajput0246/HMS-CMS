@@ -4,7 +4,7 @@ import { finalize } from 'rxjs/operators';
 
 import { ISearchRequest, IGenricGrid, INavigationaBar } from '../../models/ICommon.model';
 import { ICustomer } from '../../models/ICms.model';
-import { CmsFloorService } from '../../services/cms/floor.service';
+import { CmsCustomerService } from '../../services/cms/customer.service';
 import { CustomSnackbarService } from '../../shared/custom-snackbar/custom-snackbar.service';
 import { ConfirmationService } from '../../services/confirmation.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -16,7 +16,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
   styleUrl: './customer-list.component.scss'
 })
 export class CustomerListComponent implements OnInit {
-  private _floorService = inject(CmsFloorService);
+  private _customerService = inject(CmsCustomerService);
   private _snackbar = inject(CustomSnackbarService);
   private _confirmService = inject(ConfirmationService);
   private _dialog = inject(MatDialog);
@@ -62,7 +62,7 @@ export class CustomerListComponent implements OnInit {
       is_vip: this.isVipFilter
     };
 
-    this._floorService.getCustomers(payload)
+    this._customerService.getCustomers(payload)
       .pipe(finalize(() => this.isPageLoad = false))
       .subscribe({
         next: (res) => {
@@ -152,7 +152,7 @@ export class CustomerListComponent implements OnInit {
     this.isPageLoad = true;
     const deletePayload = { ...customer, is_active: false, is_deleted: true };
 
-    this._floorService.upsertCustomer(deletePayload)
+    this._customerService.upsertCustomer(deletePayload)
       .pipe(finalize(() => this.isPageLoad = false))
       .subscribe({
         next: (res) => {
@@ -203,7 +203,7 @@ export class CustomerFormDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<CustomerFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { customer?: any; isEdit: boolean },
-    private _floorService: CmsFloorService,
+    private _customerService: CmsCustomerService,
     private _snackbar: CustomSnackbarService
   ) {}
 
@@ -238,7 +238,7 @@ export class CustomerFormDialogComponent {
       is_deleted: false
     };
 
-    this._floorService.upsertCustomer(payload).subscribe({
+    this._customerService.upsertCustomer(payload).subscribe({
       next: (res) => {
         if (res?.status) {
           this._snackbar.openSnackBar(res.message || 'Customer saved', 'success');

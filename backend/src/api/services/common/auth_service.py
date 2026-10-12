@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import datetime, timezone, timedelta
 import jwt
 from flask import current_app, request
@@ -106,18 +107,45 @@ class AuthService:
         """Helper to generate tokens and format the login response."""
         access_exp = datetime.now(timezone.utc) + timedelta(minutes=current_app.config["JWT_ACCESS_TOKEN_EXPIRES_MIN"])
         access_token = jwt.encode(
-            {"user_id": user.id, "iat": datetime.now(timezone.utc), "exp": access_exp},
+            {
+                "user_id": user.id,
+                "iat": datetime.now(timezone.utc),
+                "exp": access_exp,
+                # jti makes each issuance distinct.
+                #
+                # Without it the payload is only {user_id, iat, exp}, and iat
+                # has one-second granularity, so two logins inside the same
+                # second signed byte-identical tokens. That broke the single
+                # live-token rule below in a way revocation cannot see: the
+                # second login revoked the first token row and then inserted a
+                # new row carrying the same access_token string, so the old
+                # token was live again immediately. Two sessions survived a
+                # re-login whenever both logins fell within one second.
+                "jti": uuid.uuid4().hex,
+            },
             current_app.config["JWT_SECRET_KEY"], algorithm=current_app.config["JWT_ALGORITHM"]
         )
 
         refresh_exp = datetime.now(timezone.utc) + timedelta(days=current_app.config["JWT_REFRESH_TOKEN_EXPIRE_DAYS"])
         refresh_token = jwt.encode(
-            {"user_id": user.id, "iat": datetime.now(timezone.utc), "exp": refresh_exp},
+            {"user_id": user.id, "iat": datetime.now(timezone.utc),
+             "exp": refresh_exp, "jti": uuid.uuid4().hex},
             current_app.config["JWT_SECRET_KEY"], algorithm=current_app.config["JWT_ALGORITHM"]
         )
 
         ## Revoke old tokens & store new one
-        self.db.query(Token).filter(Token.user_id == user.id, Token.is_revoked).update({"is_revoked": True})
+        ##
+        ## The filter has to match the LIVE tokens. A bare `Token.is_revoked`
+        ## renders as `is_revoked = 1`, which selects the already-revoked rows
+        ## and re-revokes them -- a no-op that reads as though it worked. Every
+        ## login therefore left its predecessor's token live, so a signed-in
+        ## session survived indefinitely and signing in again did not sign the
+        ## earlier session out. Written as `== False` to match logout, the
+        ## refresh path and user_account_service, which all compare explicitly.
+        self.db.query(Token).filter(
+            Token.user_id == user.id,
+            Token.is_revoked == False,
+        ).update({"is_revoked": True})
         new_token = Token(
             user_id=user.id,
             access_token=access_token,

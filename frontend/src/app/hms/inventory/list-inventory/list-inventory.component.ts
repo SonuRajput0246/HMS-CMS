@@ -28,7 +28,7 @@ export class ListInventoryComponent {
   gridSearch = '';
   inventoryList: IInventory[] = [];
   pageDet: IGenricGrid = { total_docs: 0, limit: 10 } as IGenricGrid;
-  displayedColumns: string[] = ['sr', 'name', 'category_name', 'quantity', 'unit', 'status', 'actions'];
+  displayedColumns: string[] = ['sr', 'name', 'category_name', 'quantity', 'unit', 'unit_cost', 'status', 'actions'];
   dataSource = new MatTableDataSource<IInventory>();
 
   //// Request State

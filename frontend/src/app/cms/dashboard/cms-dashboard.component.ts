@@ -87,11 +87,77 @@ export class CmsDashboardComponent implements OnInit, OnDestroy {
     this.loadKdsTickets();
 
     // Load floor counts
-    this._floorService.getTables({ page_size: 1000, page_number: 1 }).subscribe({
+    this.loadFloorCounts();
+  }
+
+  /**
+   * Tallies the whole floor for the KPI cards.
+   *
+   * Paged rather than asking for one big page. This used to request
+   * `page_size: 1000`, which the schema caps at 500, so the call returned 400
+   * on every load and -- because the subscribe had no error handler -- left the
+   * cards showing zero, indistinguishable from a genuinely empty venue.
+   *
+   * Paging to `meta.last_page` rather than raising the request size keeps the
+   * tally exact: a venue with more tables than one page is counted in full
+   * instead of quietly undercounting, and the deliberate server-side cap is
+   * left alone.
+   */
+  private loadFloorCounts(): void {
+    const pageSize = 500;
+
+    this._floorService.getTables({ page_size: pageSize, page_number: 1 }).subscribe({
       next: (res) => {
-        if (res?.status) {
-          this.floorCounts = this.calculateFloorCounts(res.data);
+        if (!res?.status) {
+          this._snackbar.openSnackBar(res?.message || 'Failed to load floor', 'error');
+          return;
         }
+
+        const rows: any[] = res.data ?? [];
+        const lastPage = Number((res as any).meta?.last_page ?? 1);
+
+        if (lastPage <= 1) {
+          this.floorCounts = this.calculateFloorCounts(rows);
+          return;
+        }
+
+        let collected = [...rows];
+        const pending: number[] = [];
+        for (let page = 2; page <= lastPage; page++) {
+          pending.push(page);
+        }
+
+        // Sequential rather than forkJoin: a venue large enough to need several
+        // pages should not have every page requested at once, and one failed
+        // page degrades to a partial count with a warning instead of discarding
+        // the pages that did load.
+        const nextPage = () => {
+          const page = pending.shift();
+          if (page === undefined) {
+            this.floorCounts = this.calculateFloorCounts(collected);
+            return;
+          }
+          this._floorService.getTables({ page_size: pageSize, page_number: page })
+            .subscribe({
+              next: (more) => {
+                if (more?.status) {
+                  collected = collected.concat(more.data ?? []);
+                } else {
+                  this._snackbar.openSnackBar(
+                    more?.message || 'Failed to load part of the floor', 'error');
+                }
+                nextPage();
+              },
+              error: () => {
+                this._snackbar.openSnackBar('Failed to load part of the floor', 'error');
+                nextPage();
+              }
+            });
+        };
+        nextPage();
+      },
+      error: (err) => {
+        this._snackbar.openSnackBar(err.error?.message || 'Failed to load floor', 'error');
       }
     });
   }

@@ -130,6 +130,13 @@ class InventoryService:
                 "category_name": inventory.category.name if inventory.category else None,
                 "quantity": inventory.quantity,
                 "unit": inventory.unit,
+                ## Read by Recipe.calculate_cost_from_ingredients(); the recipe
+                ## grid needs it to show what a dish costs to make.
+                "unit_cost": (str(inventory.unit_cost)
+                              if inventory.unit_cost is not None else None),
+                ## Used when an item is rung up directly rather than via a recipe.
+                "selling_price": (str(inventory.selling_price)
+                                  if inventory.selling_price is not None else None),
                 "is_active": inventory.is_active
             }
             for inventory in inventories
@@ -184,6 +191,10 @@ class InventoryService:
             "category_id": inventory.category_id,
             "quantity": inventory.quantity,
             "unit": inventory.unit,
+            "unit_cost": (str(inventory.unit_cost)
+                          if inventory.unit_cost is not None else None),
+            "selling_price": (str(inventory.selling_price)
+                              if inventory.selling_price is not None else None),
             "is_active": inventory.is_active,
             "is_deleted": inventory.is_deleted
         }
@@ -222,7 +233,13 @@ class InventoryService:
                 message = "Inventory updated successfully."
                 status_code = 200
 
-            FIELDS = ("name", "category_id", "quantity", "unit", "is_active", "is_deleted")
+            ## unit_cost and selling_price are CMS-facing and are read by
+            ## Recipe.calculate_cost_from_ingredients() and by OrderService when
+            ## an inventory item is rung up directly. They were missing from this
+            ## whitelist, which silently dropped them on every write -- the
+            ## schema accepted them and the service then discarded them.
+            FIELDS = ("name", "category_id", "quantity", "unit", "unit_cost",
+                      "selling_price", "is_active", "is_deleted")
             for field in FIELDS:
                 if field in data:
                     setattr(inventory, field, data[field])

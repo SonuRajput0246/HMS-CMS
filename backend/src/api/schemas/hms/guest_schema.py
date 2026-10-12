@@ -15,7 +15,28 @@ GetGuestByIdSchema = id_schema_factory("id", "Guest Id")
 
 UpsertGuestIdSchema = id_schema_factory("id","Guest Id", min_value=0)
 
-class UpsertGuestSchema(UpsertGuestIdSchema, NameFieldsMixin, EmailFieldMixin, PhoneNumberFieldMixin):
+class UpsertGuestSchema(UpsertGuestIdSchema, NameFieldsMixin, EmailFieldMixin):
+    """
+    Fields are named to match the Guest model, not to be pretty.
+
+    This schema used to inherit PhoneNumberFieldMixin (which declares `phone`)
+    and to declare `country` / `city` / `nationality` as free text. The model
+    has none of those: it stores `phone_number`, and stores location as
+    `country_id` / `state_id` / `city_id` / `nationality_id` foreign keys, with
+    `country` and `nationality` reserved for the relationships.
+
+    Marshmallow's load() returns only the declared fields, so every one of
+    GuestService.REQUIRED_FIELDS was stripped before the service ever saw it,
+    and POST /guest/upsert failed with "Field phone_number is required" for
+    every payload. Because reservation_service.create_reservation_upsert_guest
+    calls upsert_guest internally, that took the booking flow down with it --
+    no reservation could be created through the API at all. The seeded guests
+    and reservations were written straight to the models by their seeders,
+    which is why the screens looked populated.
+
+    The Angular form, the guest seeder and GuestService all already spoke the
+    model contract. The schema was the only outlier.
+    """
     gender = fields.String(
         required=True,
         ## Allowed values are NOT listed here. They come from the `gender`
@@ -50,21 +71,50 @@ class UpsertGuestSchema(UpsertGuestIdSchema, NameFieldsMixin, EmailFieldMixin, P
         allow_none=True,
         label="Address"
     )
-    city = text_field(
-        max_len=100,
-        min_len=0,
-        regex=r"^[A-Za-z '-]+$",
-        required=False,
-        allow_none=True,
-        label="City"
+    # Location is stored as foreign keys, matching the model and the Angular
+    # form. GuestService.REQUIRED_FIELDS treats all four as mandatory.
+    phone_number = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1, max=20, error="Phone number must be between 1 and 20 characters"
+        ),
+        error_messages={"required": "Phone number is required"},
     )
-    country = text_field(
-        max_len=100,
-        min_len=0,
-        regex=r"^[A-Za-z '-]+$",
-        required=False,
-        allow_none=True,
-        label="Country"
+    country_id = fields.Int(
+        required=True,
+        allow_none=False,
+        validate=validate.Range(
+            min=1, error="Country must be greater than or equal to 1"
+        ),
+        error_messages={
+            "required": "Country is required.",
+            "null": "Country cannot be null.",
+            "invalid": "Invalid Country.",
+        },
+    )
+    state_id = fields.Int(
+        required=True,
+        allow_none=False,
+        validate=validate.Range(
+            min=1, error="State must be greater than or equal to 1"
+        ),
+        error_messages={
+            "required": "State is required.",
+            "null": "State cannot be null.",
+            "invalid": "Invalid State.",
+        },
+    )
+    city_id = fields.Int(
+        required=True,
+        allow_none=False,
+        validate=validate.Range(
+            min=1, error="City must be greater than or equal to 1"
+        ),
+        error_messages={
+            "required": "City is required.",
+            "null": "City cannot be null.",
+            "invalid": "Invalid City.",
+        },
     )
     id_type = fields.String(
         required=True,
@@ -88,13 +138,18 @@ class UpsertGuestSchema(UpsertGuestIdSchema, NameFieldsMixin, EmailFieldMixin, P
         allow_none=False,
         label="Id number"
     )
-    nationality = text_field(
-        max_len=2,
-        min_len=2,
-        regex=r"^[A-Za-z]+$",
+    nationality_id = fields.Int(
         required=True,
         allow_none=False,
-        label="Nationality"
+        validate=validate.Range(
+            min=1,
+            error="Nationality must be greater than or equal to 1"
+        ),
+        error_messages={
+            "required": "Nationality is required.",
+            "null": "Nationality cannot be null.",
+            "invalid": "Invalid Nationality.",
+        },
     )
     vip_status = fields.Boolean(required=True)
     blacklist_status = fields.Boolean(required=True)

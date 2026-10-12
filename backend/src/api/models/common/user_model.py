@@ -46,7 +46,21 @@ class User(BaseModel):
     __table_args__ = (
         CheckConstraint("CHAR_LENGTH(TRIM(first_name)) > 0", name="ck_user_first_name"),
         CheckConstraint("CHAR_LENGTH(TRIM(last_name)) > 0", name="ck_user_last_name"),
-        CheckConstraint("INSTR(email, '@') > 1 AND INSTR(email, '.') > INSTR(email, '@')", name="ck_user_email_format"),
+        CheckConstraint(
+        ## Structural check only: one character, '@', one character, '.', two
+        ## characters. Real validation stays in the schema layer.
+        ##
+        ## This replaced INSTR(email,'@') > 1 AND INSTR(email,'.') >
+        ## INSTR(email,'@'), which reads as "the FIRST dot must come after the
+        ## @". INSTR returns the first match, so a dot anywhere in the local
+        ## part -- first.last@gmail.com -- put it before the '@' and the insert
+        ## was refused by the database. Registration then reported a generic
+        ## internal error, because the schema's email field accepts those
+        ## addresses and only the insert rejected them.
+        ## Kept in step with revision a7f3c21d9b40.
+        "email LIKE '_%@_%.__%'",
+        name="ck_user_email_format",
+    ),
 
         # 1. Pagination & Base Filter
         Index("ix_user_active_id", "is_deleted", "id"),

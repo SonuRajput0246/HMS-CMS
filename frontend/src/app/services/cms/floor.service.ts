@@ -4,14 +4,15 @@ import { Observable } from 'rxjs';
 
 import { AppConfig } from '../../core/config/config';
 import { IEntityResponse } from '../../models/ICommon.model';
-import { ICustomer, IFloorView } from '../../models/ICms.model';
 
 /**
- * Tables, zones and customers.
+ * Table zones, tables, and the combined floor view.
  *
- * Kept in one service because they share the till: opening a table order and
- * identifying the customer happen in the same interaction, and splitting them
- * would mean two injections on every screen.
+ * Customer methods used to live here too, on the grounds that customers and
+ * tables "share the till". That holds at the POS and nowhere else -- the
+ * customer management screen injected a service named after the floor purely to
+ * reach /api/v1/customer. They now live in CmsCustomerService; the POS screen
+ * injects both.
  */
 @Injectable({ providedIn: 'root' })
 export class CmsFloorService {
@@ -69,38 +70,5 @@ export class CmsFloorService {
     return this.http.post(`${this.baseURL}/api/v1/table/update-status`, {
       id, status, remarks: remarks ?? null
     });
-  }
-
-  // ---- customers ------------------------------------------------------
-
-  getCustomers(data: any): Observable<IEntityResponse> {
-    return this.http.post(`${this.baseURL}/api/v1/customer/get`, data);
-  }
-
-  getCustomerById(id: number): Observable<IEntityResponse> {
-    return this.http.get(`${this.baseURL}/api/v1/customer/get-by-id?id=${id}`);
-  }
-
-  lookupByPhone(phone: string): Observable<IEntityResponse> {
-    return this.http.post(`${this.baseURL}/api/v1/customer/lookup-by-phone`, { phone });
-  }
-
-  /**
-   * Minimal walk-in capture (name + phone).
-   *
-   * Returns the EXISTING customer with status 200 when the phone is already
-   * known, so a caller can treat both outcomes as "customer ready" and bill
-   * the original record.
-   */
-  quickCreateCustomer(data: { name: string; phone: string }): Observable<IEntityResponse> {
-    return this.http.post(`${this.baseURL}/api/v1/customer/quick-create`, data);
-  }
-
-  upsertCustomer(data: any): Observable<IEntityResponse> {
-    return this.http.post(`${this.baseURL}/api/v1/customer/upsert`, data);
-  }
-
-  redeemPoints(id: number, points: number): Observable<IEntityResponse> {
-    return this.http.post(`${this.baseURL}/api/v1/customer/redeem-points`, { id, points });
   }
 }

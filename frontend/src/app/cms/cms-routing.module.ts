@@ -79,6 +79,16 @@ const routes: Routes = [
     data: { menuId: 11, breadcrumb: 'Menu & Recipes' }
   },
   {
+    // Shared inventory screens, mounted on the CMS module ids. See
+    // cms/inventory/cms-inventory-routing.module.ts for why the route table is
+    // duplicated rather than reused from hms/.
+    path: 'inventory',
+    loadChildren: () =>
+      import('./inventory/cms-inventory.module').then(m => m.CmsInventoryModule),
+    canActivate: [AuthGuard],
+    data: { menuId: 8, breadcrumb: 'Inventory Management' }
+  },
+  {
     path: 'reports',
     component: ReportScreenComponent,
     canActivate: [AuthGuard],

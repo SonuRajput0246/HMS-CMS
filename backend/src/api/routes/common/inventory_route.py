@@ -1,9 +1,9 @@
 from flask import request, jsonify, Blueprint
 from src.api.middlewares.auth_middleware import  jwt_required
 from src.api.schemas.common.pagination_schema import PaginationSchema
-from src.api.schemas.hms.inventory_schema import GetCategoryByIdSchema, GetInventoryById, UpsertInventoryCategorySchema, \
+from src.api.schemas.common.inventory_schema import GetCategoryByIdSchema, GetInventoryById, UpsertInventoryCategorySchema, \
     UpsertInventorySchema
-from src.api.services.hms.inventory_service import InventoryService
+from src.api.services.common.inventory_service import InventoryService
 from src.database.session import db_session
 
 inventory_bp = Blueprint('inventory', __name__)

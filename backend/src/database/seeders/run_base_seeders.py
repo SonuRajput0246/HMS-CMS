@@ -49,9 +49,12 @@ from src.database.seeders.hms.room_seeder import seed_rooms
 from src.database.seeders.hms.room_type_amenity_seeder import seed_room_type_amenities
 from src.database.seeders.hms.room_type_seeder import seed_room_types
 
+from src.database.seeders.cms.customer_seeder import seed_cms_customers
 from src.database.seeders.cms.floor_plan_seeder import seed_floor_plan
 from src.database.seeders.cms.module_seeder import seed_modules_cms
 from src.database.seeders.cms.recipe_category_seeder import seed_recipe_categories
+from src.database.seeders.cms.recipe_seeder import seed_cms_recipes
+from src.database.seeders.cms.order_seeder import seed_cms_orders
 
 
 ## Reference data every instance needs, and that instance data depends on.
@@ -89,9 +92,17 @@ def run_cms_seeders():
     ## above, before roles, because role_seeder resolves permissions against
     ## the live modules table.
     seed_recipe_categories()
-    ## Floor plan last: POS and the floor view resolve a table's zone by name,
-    ## so the zones must exist before anything reads them.
+    ## Floor plan before customers: the customer model has a
+    ## preferred_table_id, and orders reference both.
     seed_floor_plan()
+    seed_cms_customers()
+    ## Recipes last: they resolve ingredient lines against inventory and
+    ## categories by name, so both must already exist.
+    seed_cms_recipes()
+    ## Orders after everything they reference. Reports, the dashboard and the
+    ## POS summary all read cms_orders, so this is what turns those screens
+    ## from well-formed empty payloads into readable ones.
+    seed_cms_orders()
 
 
 def run_base_seeders():

@@ -7,26 +7,41 @@ from datetime import datetime, timezone
 
 inventory_items = [
     ## Food
-    {"name": "Rice", "category": "Food", "quantity": 100, "unit": "kg"},
-    {"name": "Cooking Oil", "category": "Food", "quantity": 50, "unit": "ltr"},
-    {"name": "Sugar", "category": "Food", "quantity": 40, "unit": "kg"},
+    {"name": "Rice", "unit_cost": "45.00", "category": "Food", "quantity": 100, "unit": "kg"},
+    {"name": "Cooking Oil", "unit_cost": "180.00", "category": "Food", "quantity": 50, "unit": "ltr"},
+    {"name": "Sugar", "unit_cost": "50.00", "category": "Food", "quantity": 40, "unit": "kg"},
+
+    ## The rest of the kitchen. Added so CMS recipes have something to cost
+    ## against -- a recipe's cost is derived from its ingredient lines, and
+    ## with only rice/oil/sugar no realistic dish could be priced. The Food
+    ## category is shared with HMS, which is harmless: an unused stock line in
+    ## a hotel's inventory costs nothing.
+    {"name": "Wheat Flour", "unit_cost": "40.00", "category": "Food", "quantity": 60, "unit": "kg"},
+    {"name": "Paneer", "unit_cost": "320.00", "category": "Food", "quantity": 20, "unit": "kg"},
+    {"name": "Chicken", "unit_cost": "280.00", "category": "Food", "quantity": 25, "unit": "kg"},
+    {"name": "Tomato", "unit_cost": "30.00", "category": "Food", "quantity": 15, "unit": "kg"},
+    {"name": "Onion", "unit_cost": "35.00", "category": "Food", "quantity": 15, "unit": "kg"},
+    {"name": "Potato", "unit_cost": "25.00", "category": "Food", "quantity": 20, "unit": "kg"},
+    {"name": "Coffee Powder", "unit_cost": "800.00", "category": "Food", "quantity": 5, "unit": "kg"},
 
     ## Beverage
-    {"name": "Mineral Water Bottle", "category": "Beverage", "quantity": 200, "unit": "pcs"},
-    {"name": "Soft Drinks", "category": "Beverage", "quantity": 120, "unit": "pcs"},
+    {"name": "Mineral Water Bottle", "unit_cost": "20.00", "category": "Beverage", "quantity": 200, "unit": "pcs"},
+    {"name": "Soft Drinks", "unit_cost": "35.00", "category": "Beverage", "quantity": 120, "unit": "pcs"},
+    {"name": "Milk", "unit_cost": "60.00", "category": "Beverage", "quantity": 40, "unit": "ltr"},
+    {"name": "Tea Powder", "unit_cost": "400.00", "category": "Beverage", "quantity": 3, "unit": "kg"},
 
     ## Housekeeping
-    {"name": "Soap", "category": "Housekeeping", "quantity": 300, "unit": "pcs"},
-    {"name": "Shampoo Sachet", "category": "Housekeeping", "quantity": 250, "unit": "pcs"},
-    {"name": "Towels", "category": "Housekeeping", "quantity": 150, "unit": "pcs"},
+    {"name": "Soap", "unit_cost": "12.00", "category": "Housekeeping", "quantity": 300, "unit": "pcs"},
+    {"name": "Shampoo Sachet", "unit_cost": "8.00", "category": "Housekeeping", "quantity": 250, "unit": "pcs"},
+    {"name": "Towels", "unit_cost": "150.00", "category": "Housekeeping", "quantity": 150, "unit": "pcs"},
 
     ## Maintenance
-    {"name": "Light Bulbs", "category": "Maintenance", "quantity": 60, "unit": "pcs"},
-    {"name": "Cleaning Chemicals", "category": "Maintenance", "quantity": 25, "unit": "ltr"},
+    {"name": "Light Bulbs", "unit_cost": "45.00", "category": "Maintenance", "quantity": 60, "unit": "pcs"},
+    {"name": "Cleaning Chemicals", "unit_cost": "180.00", "category": "Maintenance", "quantity": 25, "unit": "ltr"},
 
     ## Laundry
-    {"name": "Detergent Powder", "category": "Laundry", "quantity": 80, "unit": "kg"},
-    {"name": "Fabric Softener", "category": "Laundry", "quantity": 30, "unit": "ltr"}
+    {"name": "Detergent Powder", "unit_cost": "120.00", "category": "Laundry", "quantity": 80, "unit": "kg"},
+    {"name": "Fabric Softener", "unit_cost": "220.00", "category": "Laundry", "quantity": 30, "unit": "ltr"}
 ]
 
 def seed_inventories():
@@ -52,13 +67,25 @@ def seed_inventories():
             )
             exists = db_session.execute(exists_stmt).scalar_one_or_none()
 
-            if not exists:
+            if exists:
+                ## Keep the cost in step with the seeder. An operator's own
+                ## purchase price is edited on the inventory screen, not here,
+                ## so overwriting keeps a re-seed from leaving a stale figure.
+                ## quantity is deliberately NOT touched: that is live stock,
+                ## and a deploy must not reset what the cafe has sold.
+                exists.unit_cost = item.get("unit_cost")
+                exists.updated_at = datetime.now(timezone.utc)
+            else:
                 ## BaseModel handles created_at and is_deleted automatically
                 new_item = Inventory(
                     name=item["name"],
                     category_id=category_id,
                     quantity=item["quantity"],
                     unit=item["unit"],
+                    ## Feeds Recipe.calculate_cost_from_ingredients. Left NULL
+                    ## it is read as 0, so every recipe prices at zero cost and
+                    ## margin_percent becomes meaningless.
+                    unit_cost=item.get("unit_cost"),
                     is_active=True,
                     created_at=datetime.now(timezone.utc),
                     updated_at=datetime.now(timezone.utc)
@@ -70,7 +97,11 @@ def seed_inventories():
 
     except Exception as e:
         db_session.rollback()
-        print(f"!!! Error seeding inventory: {str(e)}")
+        ## Raise rather than print-and-return: this swallowed a NameError once
+        ## and the run reported success with no inventory written at all.
+        print("!!! Inventory seeder FAILED: "
+              + str(e).encode("ascii", "replace").decode("ascii")[:300])
+        raise
 
     finally:
         db_session.remove()

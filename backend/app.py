@@ -25,7 +25,7 @@ from src.api.routes.common.template_route import template_bp
 ## HMS (hotel) routes
 from src.api.routes.hms.room_route import room_bp
 from src.api.routes.hms.guest_route import guest_bp
-from src.api.routes.hms.inventory_route import inventory_bp
+from src.api.routes.common.inventory_route import inventory_bp
 from src.api.routes.hms.reservation_route import reservation_bp
 
 ### CMS (Cafe Management System) routes
@@ -85,8 +85,16 @@ def create_app():
     app.register_blueprint(account_bp, url_prefix="/api/v1/user-account")
     app.register_blueprint(template_bp, url_prefix="/api/v1/template")
 
+    ## Inventory is shared, not HMS-only. The models, the seeders and the
+    ## category/unit reference data all live in common/, and on the CMS side
+    ## Recipe.calculate_cost_from_ingredients() multiplies each ingredient
+    ## quantity by Inventory.unit_cost. Gating this blueprint on IS_HMS left
+    ## CMS holding seeded stock it could neither read nor price against: the
+    ## recipe ingredient grid fetches its options from /inventory/get and got
+    ## a 404, so there was no way to maintain the costs the menu is built on.
+    app.register_blueprint(inventory_bp, url_prefix="/api/v1/inventory")
+
     if app.config["IS_HMS"]:
-        app.register_blueprint(inventory_bp, url_prefix="/api/v1/inventory")
         app.register_blueprint(reservation_bp, url_prefix="/api/v1/reservation")
         app.register_blueprint(room_bp, url_prefix="/api/v1/room")
         app.register_blueprint(guest_bp, url_prefix="/api/v1/guest")
